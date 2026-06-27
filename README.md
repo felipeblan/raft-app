@@ -1,59 +1,58 @@
-# RaftApp
+# Raft
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.10.
+**Raft makes tradeoffs visible.**
 
-## Development server
+Raft helps you explore what changes when Bitcoin becomes part of your financial picture. It uses your own numbers: income, bills, spending, and savings. You can test different scenarios and see how changes affect your position. Nothing changes in the real world. You simply get a more complete view of your situation.
 
-To start a local development server, run:
+Raft runs entirely on your device. No accounts. No data collection. It does not recommend anything or tell you what to do.
 
-```bash
-ng serve
-```
+## Who It's For
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Raft is for people who want a clearer view of how income, expenses, savings, and Bitcoin interact. It is especially useful if you're exploring Bitcoin and wondering what it could mean for your everyday finances. It also helps freelancers, gig workers, and anyone with variable income understand how changing circumstances affect their financial runway.
 
-## Code scaffolding
+## Why It Matters
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+People can see Bitcoin's price anywhere. What they often cannot see is how it relates to their own financial life. Bitcoin courses teach why Bitcoin exists, but very few give someone a way to explore what it could look like in their own situation. Raft fills that gap by helping someone see what changes before anything changes in the real world.
 
-```bash
-ng generate component component-name
-```
+## What Raft Shows
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+- How many months your cash can cover your bills
+- How changes in income or expenses affect your position
+- What different scenarios look like using your own numbers
+- How different choices affect your financial runway
 
-```bash
-ng generate --help
-```
+## What Raft Never Does
 
-## Building
+- Recommend Bitcoin or advise against it
+- Give financial advice
+- Collect or share your personal data
+- Tell you what to do
 
-To build the project run:
+## How to Use Raft
 
-```bash
-ng build
-```
+Raft runs in your browser. No installation is needed.
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+1. Open the browser version: https://raft-btc-app.web.app
+2. Answer a few questions about your income and bills.
+3. Explore your runway, stacking capacity, and what‑if scenarios.
 
-## Running unit tests
+You can also install Raft to your phone's home screen for a full‑screen, app‑like experience.
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## How to Run Locally (for developers)
 
-```bash
-ng test
-```
+If you want to run Raft on your own machine:
 
-## Running end-to-end tests
+1. Clone the repository: `git clone [repo URL]`
+2. Install dependencies: `npm install`
+3. Start the development server: `ng serve`
+4. Open your browser to `http://localhost:4200`
 
-For end-to-end (e2e) testing, run:
+All data is stored in your browser's localStorage. Nothing is sent to a server.
 
-```bash
-ng e2e
-```
+## Privacy
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+All calculations happen locally on your device. No data is ever sent anywhere. No accounts. No servers. No surveillance.
 
-## Additional Resources
+## License
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+MIT
