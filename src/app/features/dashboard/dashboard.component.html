@@ -1,0 +1,47 @@
+<main class="max-w-4xl mx-auto px-6 py-8 flex flex-col gap-8 mb-20">
+  
+  @if (showPaydayPulse()) {
+    <div class="bg-orange-50 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-900/30 rounded-xl p-4 flex justify-between items-start animate-fade-in relative overflow-hidden">
+      <div class="absolute right-0 top-0 w-32 h-32 bg-orange-200/50 dark:bg-orange-500/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+      <div>
+        <h3 class="text-orange-800 dark:text-orange-400 font-bold text-sm flex items-center gap-2 mb-1">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          Payday Pulse
+        </h3>
+        <p class="text-orange-700 dark:text-orange-300 text-sm leading-relaxed">
+          It's payday! Your runway is <strong>{{ store.fiatRunwayMonths() !== null ? (store.fiatRunwayMonths() === 999 ? '∞' : (store.fiatRunwayMonths() | number:'1.1-1')) : '0' }} months</strong>. 
+          After your bills this month, you could safely stack 
+          <strong>{{ (store.monthlyBtcCapacity() * 100000000) | number:'1.0-0' }} sats</strong>.
+          @if (store.goalSats() > 0 && store.goalType() === 'stacking') {
+            You're <strong>{{ ((store.totalBtc() * 100000000) / store.goalSats() * 100) | number:'1.0-1' }}%</strong> toward your goal.
+          }
+        </p>
+      </div>
+      <button (click)="dismissPaydayPulse()" class="text-orange-400 hover:text-orange-600 dark:hover:text-orange-300 p-1 rounded-md transition-colors z-10">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  }
+
+  <app-status-card></app-status-card>
+
+  <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <app-liquidity-cashflow></app-liquidity-cashflow>
+    <app-bills (manageBills)="isModalOpen.set(true)"></app-bills>
+  </section>
+
+  <app-wallet-sweep></app-wallet-sweep>
+
+  <app-what-if-simulator></app-what-if-simulator>
+  
+  <app-tax-awareness></app-tax-awareness>
+
+  <div class="text-xs text-gray-400 text-center pt-2 border-t border-gray-100">
+    This tool does not provide tax, legal, or financial advice. Consult a qualified professional.
+  </div>
+</main>
+
+@if (isModalOpen()) {
+  <app-manage-bills-modal (close)="isModalOpen.set(false)"></app-manage-bills-modal>
+}
+

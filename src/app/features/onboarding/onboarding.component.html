@@ -1,0 +1,71 @@
+<div class="min-h-screen flex flex-col items-center justify-center py-12 px-6">
+  <div class="max-w-xl w-full flex flex-col gap-8 animate-fade-in">
+    <div class="flex items-center gap-2 text-xl font-semibold tracking-tight justify-center mb-4">
+      <svg class="w-6 h-6" viewBox="0 0 64 64" fill="none">
+        <rect x="8" y="12" width="48" height="10" rx="4" fill="#8B5E3C"/>
+        <rect x="8" y="27" width="48" height="10" rx="4" fill="#ea580c"/>
+        <rect x="8" y="42" width="48" height="10" rx="4" fill="#8B5E3C"/>
+      </svg>
+      Raft
+    </div>
+    
+    @if (step() === 1) {
+      <div class="flex flex-col gap-6">
+        <div class="text-center">
+          <h1 class="text-2xl font-semibold mb-2">How do you operate?</h1>
+          <p class="text-sm text-gray-500">Select your main income structure.</p>
+          <p class="text-xs text-gray-400 mt-1">We'll use this to tailor your dashboard view.</p>
+        </div>
+        <div class="flex flex-col gap-3">
+          @for (option of incomeOptions; track option.id) {
+            <div 
+              (click)="selectedIncome.set(option.id)" 
+              class="selectable-card border rounded-xl p-4 flex justify-between group cursor-pointer"
+              [class.selected]="selectedIncome() === option.id">
+              <div>
+                <div class="font-medium text-sm">{{ option.title }}</div>
+                <div class="text-xs text-gray-500 mt-0.5">{{ option.desc }}</div>
+              </div>
+              <div class="w-4 h-4 rounded-full border border-gray-300 group-[.selected]:border-gray-900 group-[.selected]:bg-gray-900"></div>
+            </div>
+          }
+        </div>
+        <button (click)="nextStep()" class="w-full bg-gray-900 text-white rounded-lg py-3 text-sm font-medium hover:bg-gray-800 mt-2 transition-colors">
+          Next Step
+        </button>
+        <div class="mt-2 flex flex-col items-center gap-3">
+          <p class="text-[10px] text-gray-400">Raft never recommends anything. It just does math on your numbers.</p>
+          <button (click)="finish(true)" class="text-sm text-gray-500 hover:text-gray-900 underline transition-colors">Skip for now</button>
+        </div>
+      </div>
+    } @else {
+      <div class="flex flex-col gap-8 animate-fade-in">
+        <div class="text-center">
+          <h1 class="text-2xl font-semibold mb-2">Your starting point</h1>
+          <p class="text-sm text-gray-500">We'll use these to calculate your runway and stacking capacity.</p>
+        </div>
+        <div class="flex flex-col gap-4">
+          <div>
+            <label class="text-xs font-medium block mb-1">Total Fiat Available (USD)</label>
+            <input type="number" [(ngModel)]="fiatInput" placeholder="e.g. 5600" class="w-full border rounded-md p-3 focus:ring-2 focus:ring-gray-900 focus:outline-none">
+          </div>
+          <div>
+            <label class="text-xs font-medium block mb-1">Expected Monthly Fiat Income (USD)</label>
+            <input type="number" [(ngModel)]="incomeInput" placeholder="e.g. 1200" class="w-full border rounded-md p-3 focus:ring-2 focus:ring-gray-900 focus:outline-none">
+          </div>
+          <div>
+            <label class="text-xs font-medium block mb-1">BTC Holdings (USD equivalent)</label>
+            <input type="number" [(ngModel)]="btcUsdInput" placeholder="e.g. 5000" class="w-full border rounded-md p-3 focus:ring-2 focus:ring-gray-900 focus:outline-none">
+            <p class="text-xs text-gray-400 mt-1">
+              ≈ {{ btcPreview() | number:'1.5-5' }} BTC
+            </p>
+          </div>
+        </div>
+        <button (click)="finish()" class="w-full bg-gray-900 text-white rounded-lg py-4 text-sm font-medium hover:bg-gray-800 flex justify-center items-center gap-2 shadow-lg transition-colors">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 8 12 2 6 8 2 12"/><polyline points="18 8 18 22 6 22 6 8"/></svg>
+          Go to Dashboard
+        </button>
+      </div>
+    }
+  </div>
+</div>

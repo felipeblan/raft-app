@@ -1,0 +1,117 @@
+<div class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm overflow-y-auto z-50">
+  <div class="min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl border border-gray-200 p-6 w-full max-w-xl animate-fade-in my-8">
+      <h2 class="text-lg font-semibold mb-4">Manage Bills</h2>
+      
+      <div class="flex flex-col gap-6">
+        <div>
+          <h3 class="text-sm font-medium mb-2">Current Bills</h3>
+          <div class="flex flex-col gap-2 max-h-40 overflow-y-auto pr-2">
+            @if (store.obligations().length === 0) {
+              <div class="text-sm text-gray-400 italic">No bills.</div>
+            } @else {
+              @for (b of store.displayObligations(); track b.id) {
+                <div class="flex justify-between items-center py-2 border-b border-gray-50 last:border-0 hover:bg-gray-50 px-2 -mx-2 rounded transition-colors group">
+                  <div class="flex flex-col sm:flex-row sm:items-center sm:gap-3">
+                    <span class="text-sm font-medium text-gray-900">{{ b.name }}</span>
+                    <span class="text-xs text-gray-500">
+                      Day {{ b.day }} — 
+                      @if (b.displayAmount === '****') { **** } @else { {{ b.amount | currency:store.currency().toUpperCase():'symbol':'1.0-0' }} }
+                    </span>
+                    <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded border inline-block w-fit mt-1 sm:mt-0" [class.bg-orange-50]="b.method === 'bridge'" [class.text-orange-700]="b.method === 'bridge'" [class.border-orange-200]="b.method === 'bridge'" [class.bg-gray-100]="b.method !== 'bridge'" [class.text-gray-600]="b.method !== 'bridge'" [class.border-gray-200]="b.method !== 'bridge'">
+                      {{ b.method === 'bridge' ? 'BTC' : 'Fiat' }}
+                    </span>
+                  </div>
+                  <div class="flex items-center gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button (click)="editBill(b)" class="text-gray-400 hover:text-blue-600 p-1">
+                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                    </button>
+                    <button (click)="deleteBill(b.id)" class="text-gray-400 hover:text-red-600 p-1">
+                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                    </button>
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        </div>
+        
+        <div class="border-t border-gray-100 pt-4 relative z-10">
+          <h3 class="text-sm font-medium mb-3">{{ editingId() ? 'Edit Bill' : 'Add a Bill' }}</h3>
+          
+          <div class="grid grid-cols-2 gap-3 mb-3">
+            <div>
+              <label class="text-xs font-medium block mb-1">Name</label>
+              <input type="text" [(ngModel)]="formName" class="w-full border rounded-md p-2 text-sm">
+            </div>
+            <div>
+              <label class="text-xs font-medium block mb-1">Amount ({{ store.currencySymbol() }})</label>
+              <input type="number" [(ngModel)]="formAmount" class="w-full border rounded-md p-2 text-sm">
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-3 mb-3">
+            <div>
+              <label class="text-xs font-medium block mb-1">Settlement</label>
+              <select [(ngModel)]="formMethod" class="w-full border rounded-md p-2 text-sm">
+                <option value="fiat">Fiat (Bank/Card)</option>
+                <option value="bridge">Bridge (BTC via service)</option>
+              </select>
+            </div>
+            <div class="relative">
+              <label class="text-xs font-medium block mb-1">Day of Month</label>
+              <div>
+                <div (click)="toggleCalendar()" class="w-full border rounded-md p-2 text-sm bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
+                  <span>{{ formDay() || 'Choose day' }}</span>
+                  <svg class="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                
+                @if (showCalendar()) {
+                  <div class="absolute mt-1 p-2 border border-gray-200 rounded-lg bg-white shadow-lg w-full z-20">
+                    <div class="flex justify-between items-center mb-2">
+                      <button (click)="changeMonth(-1)" class="text-gray-500 hover:text-gray-900 p-1"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+                      <span class="text-sm font-medium">{{ calendarMonthName }} {{ calYear() }}</span>
+                      <button (click)="changeMonth(1)" class="text-gray-500 hover:text-gray-900 p-1"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-medium text-gray-400 mb-1">
+                      <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1">
+                      @for (empty of emptyDays; track $index) {
+                        <div></div>
+                      }
+                      @for (day of daysInMonth; track day) {
+                        <div 
+                          (click)="selectDay(day)"
+                          class="text-xs text-center p-1 rounded-md cursor-pointer hover:bg-gray-100 transition-colors"
+                          [class.bg-gray-900]="formDay() === day"
+                          [class.text-white]="formDay() === day"
+                          [class.hover:bg-gray-800]="formDay() === day">
+                          {{ day }}
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex gap-3 justify-end mt-4">
+            @if (editingId()) {
+              <button (click)="cancelEdit()" class="px-4 py-2 text-sm font-medium hover:text-gray-900">Cancel Edit</button>
+            }
+            <button (click)="saveBill()" class="px-5 py-2 bg-gray-900 text-white rounded-md text-sm font-medium hover:bg-gray-800 transition-colors">
+              Save Bill
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="flex justify-end border-t border-gray-100 pt-4 mt-6">
+        <button (click)="close.emit()" class="px-5 py-2 text-sm font-medium border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+

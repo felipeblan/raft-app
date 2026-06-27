@@ -1,0 +1,88 @@
+@reference "tailwindcss";
+
+.onboarding-container {
+  @apply min-h-screen flex flex-col items-center justify-center py-12 px-6;
+}
+
+.onboarding-wrapper {
+  @apply max-w-xl w-full flex flex-col gap-8;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.logo-large {
+  @apply flex items-center gap-2 text-xl font-semibold tracking-tight justify-center mb-4;
+}
+
+.step-container {
+  @apply flex flex-col gap-6;
+}
+
+.header-group {
+  @apply text-center;
+  
+  .title {
+    @apply text-2xl font-semibold text-gray-900 mb-2;
+  }
+  
+  .subtitle {
+    @apply text-gray-500 text-sm;
+  }
+}
+
+.options-list {
+  @apply flex flex-col gap-3;
+}
+
+.option-card {
+  @apply cursor-pointer border border-gray-200 rounded-xl p-4 flex justify-between;
+
+  &.active {
+    @apply border-orange-600 bg-orange-50;
+  }
+
+  .option-info {
+    .option-title {
+      @apply font-medium text-sm;
+    }
+    .option-desc {
+      @apply text-xs text-gray-500 mt-0.5;
+    }
+  }
+
+  .radio-dot {
+    @apply w-4 h-4 rounded-full border border-gray-300;
+    
+    &.active {
+      @apply border-gray-900 bg-gray-900;
+    }
+  }
+}
+
+.input-group {
+  @apply flex flex-col gap-4;
+  
+  .input-field-wrapper {
+    .label {
+      @apply text-xs font-medium text-gray-700 block mb-1;
+    }
+    .input {
+      @apply w-full border border-gray-200 rounded-md p-3 focus:ring-2 focus:ring-gray-900 focus:outline-none;
+    }
+    .helper-text {
+      @apply text-xs text-gray-400 mt-1;
+    }
+  }
+}
+
+.btn-primary {
+  @apply w-full bg-gray-900 text-white rounded-lg py-3 text-sm font-medium hover:bg-gray-800 mt-2;
+  
+  &.btn-lg {
+    @apply py-4 flex justify-center items-center gap-2 shadow-lg;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

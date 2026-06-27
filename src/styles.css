@@ -1,0 +1,160 @@
+@import "tailwindcss";
+
+/* ---------- CSS Custom Properties (Light & Dark) ---------- */
+:root {
+  --bg: #FDFDFD;
+  --surface: #ffffff;
+  --surface-alt: #f9fafb;
+  --text: #111827;
+  --text-secondary: #4b5563;
+  --text-muted: #6b7280;
+  --border: #e5e7eb;
+  --border-light: #f3f4f6;
+  --accent: #ea580c;
+  --accent-light: #fff7ed;
+  --green-bg: #f0fdf4;
+  --green-text: #15803d;
+  --orange-bg: #fff7ed;
+  --orange-text: #c2410c;
+  --input-bg: #ffffff;
+  --input-border: #d1d5db;
+  --shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+  --runway-bar-bg: #e5e7eb;
+  --runway-bar-fill: #16a34a;
+  --logo-brown: #8B5E3C;
+}
+.dark {
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --surface-alt: #1e293b;
+  --text: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border: #334155;
+  --border-light: #1e293b;
+  --accent: #fb923c;
+  --accent-light: #2d1f12;
+  --green-bg: #0f2b1a;
+  --green-text: #4ade80;
+  --orange-bg: #2d1f12;
+  --orange-text: #fdba74;
+  --input-bg: #1e293b;
+  --input-border: #475569;
+  --shadow: 0 1px 2px 0 rgba(0,0,0,0.3);
+  --runway-bar-bg: #334155;
+  --runway-bar-fill: #4ade80;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* ---------- Color overrides with CSS variables ---------- */
+.bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200, .selectable-card, .whatif-tab {
+  background-color: var(--surface);
+}
+.bg-gray-50 { background-color: var(--surface-alt); }
+.bg-gray-100 { background-color: var(--border-light); }
+.bg-gray-200 { background-color: var(--border); }
+.text-gray-900, .text-gray-700, .text-gray-600, .text-gray-500, .text-gray-400, .text-gray-300 {
+  color: var(--text);
+}
+.text-gray-600 { color: var(--text-secondary); }
+.text-gray-500 { color: var(--text-muted); }
+.text-gray-400 { color: var(--text-muted); }
+.border-gray-200, .border-gray-100, .border-gray-50 { border-color: var(--border); }
+.border-gray-100 { border-color: var(--border-light); }
+.bg-green-50 { background-color: var(--green-bg); }
+.bg-green-100 { background-color: var(--green-bg); }
+.text-green-700 { color: var(--green-text); }
+.bg-orange-50, .bg-orange-100, .bg-orange-50\/30, .bg-orange-50\/50 { background-color: var(--orange-bg); }
+.text-orange-700 { color: var(--orange-text); }
+.text-orange-600 { color: var(--accent); }
+
+/* Inputs, selects, textareas */
+input, select, textarea {
+  background-color: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--text);
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+/* Tabs */
+.tab-active { border-bottom: 2px solid var(--text); color: var(--text); font-weight: 500; }
+.tab-inactive { color: var(--text-muted); }
+.tab-inactive:hover { color: var(--text); }
+
+/* What‑if tabs */
+.whatif-tab {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+.whatif-tab.active {
+  border-color: var(--accent);
+  background-color: var(--accent-light);
+}
+
+/* Selectable cards (onboarding) */
+.selectable-card {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: border-color 0.2s, background-color 0.2s;
+}
+.selectable-card.selected {
+  border-color: var(--accent);
+  background-color: var(--accent-light);
+}
+
+/* Mini calendar */
+.mini-calendar-day {
+  cursor: pointer;
+  width: 100%;
+  aspect-ratio: 1/1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  color: var(--text);
+}
+.mini-calendar-day:hover { background-color: var(--border-light); }
+.mini-calendar-day.selected { background-color: var(--accent); color: white; }
+
+/* Animations */
+.animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulseNumber { 0% { transform: scale(1); } 50% { transform: scale(1.08); color: var(--accent); } 100% { transform: scale(1); } }
+.animate-number { animation: pulseNumber 0.3s ease-out; }
+
+/* Hide scrollbar */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Print */
+@media print {
+  nav, button, input, select, .whatif-tab, #manage-modal, #position-modal, #onboarding-flow, #btc-bridge-container, #sweep-message, #tax-events-list, #max-fill-btn, #mini-calendar, #cancel-edit-btn, #bill-delete-btn { display: none !important; }
+  body { background: white; color: black; font-size: 12pt; }
+  .max-w-4xl { max-width: 100%; }
+  .border { border: 1px solid #ccc; }
+  .sensitive-data { filter: none; }
+}
+
+/* Phase C: Goal progress ring */
+.goal-ring {
+  transform: rotate(-90deg);
+}
+.goal-ring circle {
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+/* Privacy Blur */
+.privacy-blur .sensitive-data,
+.privacy-blur span:not(.font-normal):not(.text-sm) {
+  filter: blur(4px);
+}

@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Raft – Bitcoin Operational Dashboard</title>
+  <!-- Updated logo: brown (#8B5E3C) bars for dark‑mode visibility -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='12' width='48' height='10' rx='4' fill='%238B5E3C'/%3E%3Crect x='8' y='27' width='48' height='10' rx='4' fill='%23ea580c'/%3E%3Crect x='8' y='42' width='48' height='10' rx='4' fill='%238B5E3C'/%3E%3C/svg%3E" type="image/svg+xml">
+  <style>
+    /* ---------- CSS Custom Properties (Light & Dark) ---------- */
+    :root {
+      --bg: #FDFDFD;
+      --surface: #ffffff;
+      --surface-alt: #f9fafb;
+      --text: #111827;
+      --text-secondary: #4b5563;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+      --border-light: #f3f4f6;
+      --accent: #ea580c;
+      --accent-light: #fff7ed;
+      --green-bg: #f0fdf4;
+      --green-text: #15803d;
+      --orange-bg: #fff7ed;
+      --orange-text: #c2410c;
+      --input-bg: #ffffff;
+      --input-border: #d1d5db;
+      --shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+      --runway-bar-bg: #e5e7eb;
+      --runway-bar-fill: #16a34a;
+      --logo-brown: #8B5E3C;
+    }
+    .dark {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-alt: #1e293b;
+      --text: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border: #334155;
+      --border-light: #1e293b;
+      --accent: #fb923c;
+      --accent-light: #2d1f12;
+      --green-bg: #0f2b1a;
+      --green-text: #4ade80;
+      --orange-bg: #2d1f12;
+      --orange-text: #fdba74;
+      --input-bg: #1e293b;
+      --input-border: #475569;
+      --shadow: 0 1px 2px 0 rgba(0,0,0,0.3);
+      --runway-bar-bg: #334155;
+      --runway-bar-fill: #4ade80;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); }
+
+    /* ---------- utility classes (full tailwind subset) ---------- */
+    .flex { display: flex; } .flex-col { flex-direction: column; } .flex-row { flex-direction: row; } .flex-wrap { flex-wrap: wrap; }
+    .items-center { align-items: center; } .items-start { align-items: flex-start; } .items-end { align-items: flex-end; }
+    .justify-center { justify-content: center; } .justify-between { justify-content: space-between; } .justify-end { justify-content: flex-end; }
+    .gap-1 { gap: 0.25rem; } .gap-2 { gap: 0.5rem; } .gap-3 { gap: 0.75rem; } .gap-4 { gap: 1rem; } .gap-6 { gap: 1.5rem; } .gap-8 { gap: 2rem; }
+    .grid { display: grid; } .grid-cols-1 { grid-template-columns: repeat(1, 1fr); } .grid-cols-2 { grid-template-columns: repeat(2, 1fr); } .grid-cols-3 { grid-template-columns: repeat(3, 1fr); } .grid-cols-7 { grid-template-columns: repeat(7, 1fr); }
+    .col-span-2 { grid-column: span 2; } .text-center { text-align: center; } .text-right { text-align: right; } .text-left { text-align: left; }
+    .font-light { font-weight: 300; } .font-normal { font-weight: 400; } .font-medium { font-weight: 500; } .font-semibold { font-weight: 600; } .font-bold { font-weight: 700; }
+    .text-xs { font-size: 0.75rem; } .text-sm { font-size: 0.875rem; } .text-base { font-size: 1rem; } .text-lg { font-size: 1.125rem; } .text-xl { font-size: 1.25rem; } .text-2xl { font-size: 1.5rem; } .text-3xl { font-size: 1.875rem; } .text-4xl { font-size: 2.25rem; } .text-6xl { font-size: 3.75rem; }
+    .leading-relaxed { line-height: 1.625; } .tracking-tight { letter-spacing: -0.025em; } .tracking-wider { letter-spacing: 0.05em; } .tracking-widest { letter-spacing: 0.1em; }
+    .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .whitespace-nowrap { white-space: nowrap; } .uppercase { text-transform: uppercase; }
+    .hidden { display: none; } .block { display: block; } .inline-block { display: inline-block; } .inline-flex { display: inline-flex; }
+    .w-3 { width: 0.75rem; } .w-4 { width: 1rem; } .w-5 { width: 1.25rem; } .w-6 { width: 1.5rem; } .w-8 { width: 2rem; } .w-10 { width: 2.5rem; } .w-12 { width: 3rem; } .w-16 { width: 4rem; } .w-24 { width: 6rem; } .w-32 { width: 8rem; } .w-full { width: 100%; } .w-1\/2 { width: 50%; } .w-1\/4 { width: 25%; }
+    .h-3 { height: 0.75rem; } .h-4 { height: 1rem; } .h-5 { height: 1.25rem; } .h-6 { height: 1.5rem; } .h-8 { height: 2rem; } .h-10 { height: 2.5rem; } .h-12 { height: 3rem; } .h-16 { height: 4rem; } .h-px { height: 1px; }
+    .max-h-40 { max-height: 10rem; } .max-h-48 { max-height: 12rem; } .min-h-screen { min-height: 100vh; }
+    .p-1 { padding: 0.25rem; } .p-2 { padding: 0.5rem; } .p-3 { padding: 0.75rem; } .p-4 { padding: 1rem; } .p-5 { padding: 1.25rem; } .p-6 { padding: 1.5rem; } .p-8 { padding: 2rem; }
+    .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; } .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; } .px-4 { padding-left: 1rem; padding-right: 1rem; } .px-5 { padding-left: 1.25rem; padding-right: 1.25rem; } .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; } .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; } .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; } .py-4 { padding-top: 1rem; padding-bottom: 1rem; } .py-8 { padding-top: 2rem; padding-bottom: 2rem; } .py-12 { padding-top: 3rem; padding-bottom: 3rem; }
+    .pt-1 { padding-top: 0.25rem; } .pt-2 { padding-top: 0.5rem; } .pt-4 { padding-top: 1rem; } .pb-1 { padding-bottom: 0.25rem; } .pb-2 { padding-bottom: 0.5rem; } .pb-3 { padding-bottom: 0.75rem; } .pb-4 { padding-bottom: 1rem; } .pb-6 { padding-bottom: 1.5rem; }
+    .pl-2 { padding-left: 0.5rem; } .pr-1 { padding-right: 0.25rem; } .pr-2 { padding-right: 0.5rem; }
+    .ml-1 { margin-left: 0.25rem; } .ml-2 { margin-left: 0.5rem; } .ml-auto { margin-left: auto; } .mr-1 { margin-right: 0.25rem; }
+    .mt-0\.5 { margin-top: 0.125rem; } .mt-1 { margin-top: 0.25rem; } .mt-2 { margin-top: 0.5rem; } .mt-4 { margin-top: 1rem; } .mt-6 { margin-top: 1.5rem; } .mt-8 { margin-top: 2rem; } .mt-auto { margin-top: auto; }
+    .mb-1 { margin-bottom: 0.25rem; } .mb-2 { margin-bottom: 0.5rem; } .mb-3 { margin-bottom: 0.75rem; } .mb-4 { margin-bottom: 1rem; } .mb-6 { margin-bottom: 1.5rem; } .mb-8 { margin-bottom: 2rem; } .mb-20 { margin-bottom: 5rem; }
+    .mr-2 { margin-right: 0.5rem; } .mx-auto { margin-left: auto; margin-right: auto; } .my-8 { margin-top: 2rem; margin-bottom: 2rem; }
+    .max-w-4xl { max-width: 56rem; } .max-w-md { max-width: 28rem; } .max-w-sm { max-width: 24rem; } .max-w-xl { max-width: 36rem; }
+    .overflow-y-auto { overflow-y: auto; } .overflow-x-auto { overflow-x: auto; } .overflow-hidden { overflow: hidden; }
+    .rounded { border-radius: 0.375rem; } .rounded-md { border-radius: 0.375rem; } .rounded-lg { border-radius: 0.5rem; } .rounded-xl { border-radius: 0.75rem; } .rounded-2xl { border-radius: 1rem; } .rounded-full { border-radius: 9999px; }
+    .border { border: 1px solid; } .border-t { border-top: 1px solid; } .border-b { border-bottom: 1px solid; } .border-l { border-left: 1px solid; }
+    .border-transparent { border-color: transparent; }
+    .shadow-sm { box-shadow: var(--shadow); } .shadow { box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1),0 1px 2px -1px rgba(0,0,0,0.1); } .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -4px rgba(0,0,0,0.1); } .shadow-xl { box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1),0 8px 10px -6px rgba(0,0,0,0.1); } .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); } .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.05); }
+
+    /* ---------- Color overrides with CSS variables ---------- */
+    .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200, .selectable-card, .whatif-tab {
+      background-color: var(--surface);
+    }
+    .bg-gray-50 { background-color: var(--surface-alt); }
+    .bg-gray-100 { background-color: var(--border-light); }
+    .bg-gray-200 { background-color: var(--border); }
+    .text-gray-900, .text-gray-700, .text-gray-600, .text-gray-500, .text-gray-400, .text-gray-300 {
+      color: var(--text);
+    }
+    .text-gray-600 { color: var(--text-secondary); }
+    .text-gray-500 { color: var(--text-muted); }
+    .text-gray-400 { color: var(--text-muted); }
+    .border-gray-200, .border-gray-100, .border-gray-50 { border-color: var(--border); }
+    .border-gray-100 { border-color: var(--border-light); }
+    .bg-green-50 { background-color: var(--green-bg); }
+    .bg-green-100 { background-color: var(--green-bg); }
+    .text-green-700 { color: var(--green-text); }
+    .bg-orange-50, .bg-orange-100, .bg-orange-50\/30, .bg-orange-50\/50 { background-color: var(--orange-bg); }
+    .text-orange-700 { color: var(--orange-text); }
+    .text-orange-600 { color: var(--accent); }
+
+    /* Inputs, selects, textareas */
+    input, select, textarea {
+      background-color: var(--input-bg);
+      border-color: var(--input-border);
+      color: var(--text);
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+
+    /* Buttons */
+    button {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+      cursor: pointer;
+    }
+    .bg-gray-900, button.bg-gray-900 {
+      background-color: #111827 !important;
+      color: white !important;
+    }
+    .hover\:bg-gray-800:hover { background-color: #1f2937 !important; }
+
+    /* Tabs */
+    .tab-active { border-bottom: 2px solid var(--text); color: var(--text); font-weight: 500; }
+    .tab-inactive { color: var(--text-muted); }
+    .tab-inactive:hover { color: var(--text); }
+
+    /* What‑if tabs */
+    .whatif-tab {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+    }
+    .whatif-tab.active {
+      border-color: var(--accent);
+      background-color: var(--accent-light);
+    }
+
+    /* Selectable cards (onboarding) */
+    .selectable-card {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      transition: border-color 0.2s, background-color 0.2s;
+    }
+    .selectable-card.selected {
+      border-color: var(--accent);
+      background-color: var(--accent-light);
+    }
+
+    /* Mini calendar */
+    .mini-calendar-day {
+      cursor: pointer;
+      width: 100%;
+      aspect-ratio: 1/1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9999px;
+      color: var(--text);
+    }
+    .mini-calendar-day:hover { background-color: var(--border-light); }
+    .mini-calendar-day.selected { background-color: var(--accent); color: white; }
+
+    /* Animations */
+    .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulseNumber { 0% { transform: scale(1); } 50% { transform: scale(1.08); color: var(--accent); } 100% { transform: scale(1); } }
+    .animate-number { animation: pulseNumber 0.3s ease-out; }
+
+    /* Hide scrollbar */
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Print */
+    @media print {
+      nav, button, input, select, .whatif-tab, #manage-modal, #position-modal, #onboarding-flow, #btc-bridge-container, #sweep-message, #tax-events-list, #max-fill-btn, #mini-calendar, #cancel-edit-btn, #bill-delete-btn { display: none !important; }
+      body { background: white; color: black; font-size: 12pt; }
+      .max-w-4xl { max-width: 100%; }
+      .border { border: 1px solid #ccc; }
+      .sensitive-data { filter: none; }
+    }
+
+    /* Additional dark‑mode overrides for dynamic content */
+    .sensitive-data, .currency-label { color: inherit; }
+    #runway-bar-fill { background-color: var(--runway-bar-fill); }
+    .hover\:bg-gray-50:hover { background-color: var(--surface-alt); }
+    .hover\:bg-gray-100:hover { background-color: var(--border-light); }
+    .hover\:bg-gray-200:hover { background-color: var(--border); }
+    .hover\:text-gray-700:hover { color: var(--text-secondary); }
+    .hover\:text-gray-900:hover { color: var(--text); }
+    .hover\:text-orange-600:hover { color: var(--accent); }
+    .hover\:text-red-500:hover { color: #ef4444; }
+    .hover\:text-red-600:hover { color: #dc2626; }
+    .hover\:text-red-700:hover { color: #b91c1c; }
+
+    /* sticky & fixed */
+    .sticky { position: sticky; }
+    .top-0 { top: 0; }
+    .z-40 { z-index: 40; }
+    .z-50 { z-index: 50; }
+    .fixed { position: fixed; }
+    .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+    .relative { position: relative; }
+    .absolute { position: absolute; }
+    .backdrop-blur-sm { backdrop-filter: blur(4px); }
+    .cursor-pointer { cursor: pointer; }
+    .bg-gray-900\/40 { background-color: rgba(17,24,39,0.4); }
+    .bg-white\/90 { background-color: rgba(255,255,255,0.9); }
+    @media (min-width: 640px) {
+      .sm\:block { display: block; } .sm\:flex { display: flex; } .sm\:flex-row { flex-direction: row; } .sm\:items-center { align-items: center; } .sm\:justify-between { justify-content: space-between; } .sm\:mt-0 { margin-top: 0; } .sm\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); } .sm\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (min-width: 768px) {
+      .md\:block { display: block; } .md\:flex { display: flex; } .md\:flex-row { flex-direction: row; } .md\:justify-between { justify-content: space-between; } .md\:items-end { align-items: flex-end; } .md\:col-span-2 { grid-column: span 2; } .md\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+    }
+    /* Phase C: Goal progress ring */
+    .goal-ring {
+      transform: rotate(-90deg);
+    }
+    .goal-ring circle {
+      transition: stroke-dashoffset 0.5s ease;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <!-- ========== ONBOARDING ========== -->
+  <div id="onboarding-flow" class="hidden min-h-screen flex flex-col items-center justify-center py-12 px-6">
+    <div class="max-w-xl w-full flex flex-col gap-8 animate-fade-in">
+      <div class="flex items-center gap-2 text-xl font-semibold tracking-tight justify-center mb-4">
+        <svg class="w-6 h-6" viewBox="0 0 64 64" fill="none">
+          <rect x="8" y="12" width="48" height="10" rx="4" fill="#8B5E3C"/>
+          <rect x="8" y="27" width="48" height="10" rx="4" fill="#ea580c"/>
+          <rect x="8" y="42" width="48" height="10" rx="4" fill="#8B5E3C"/>
+        </svg>
+        Raft
+      </div>
+      <div id="ob-step-1" class="flex flex-col gap-6">
+        <div class="text-center"><h1 class="text-2xl font-semibold mb-2">How do you operate?</h1><p class="text-sm text-gray-500">Select your main income structure.</p></div>
+        <div class="flex flex-col gap-3">
+          <div onclick="selectIncome(this)" class="selectable-card border rounded-xl p-4 flex justify-between group selected">
+            <div><div class="font-medium text-sm">Entirely Fiat</div><div class="text-xs text-gray-500 mt-0.5">I earn in fiat and buy BTC manually.</div></div>
+            <div class="w-4 h-4 rounded-full border border-gray-300 group-[.selected]:border-gray-900 group-[.selected]:bg-gray-900"></div>
+          </div>
+          <div onclick="selectIncome(this)" class="selectable-card border rounded-xl p-4 flex justify-between group">
+            <div><div class="font-medium text-sm">Hybrid (Fiat + BTC)</div><div class="text-xs text-gray-500 mt-0.5">Some income comes in BTC.</div></div>
+            <div class="w-4 h-4 rounded-full border border-gray-300 group-[.selected]:border-gray-900 group-[.selected]:bg-gray-900"></div>
+          </div>
+          <div onclick="selectIncome(this)" class="selectable-card border rounded-xl p-4 flex justify-between group">
+            <div><div class="font-medium text-sm">Mostly BTC</div><div class="text-xs text-gray-500 mt-0.5">I convert BTC to fiat only for bills.</div></div>
+            <div class="w-4 h-4 rounded-full border border-gray-300 group-[.selected]:border-gray-900 group-[.selected]:bg-gray-900"></div>
+          </div>
+        </div>
+        <button onclick="goToObStep(2)" class="w-full bg-gray-900 text-white rounded-lg py-3 text-sm font-medium hover:bg-gray-800 mt-2">Next Step</button>
+      </div>
+      <div id="ob-step-2" class="hidden flex-col gap-8 animate-fade-in">
+        <div class="text-center"><h1 class="text-2xl font-semibold mb-2">Your starting point</h1><p class="text-sm text-gray-500">We'll use these to calculate your runway and stacking capacity.</p></div>
+        <div class="flex flex-col gap-4">
+          <div><label class="text-xs font-medium block mb-1">Total Fiat Available (USD)</label><input type="number" id="ob-fiat" placeholder="e.g. 5600" class="w-full border rounded-md p-3 focus:ring-2 focus:ring-gray-900 focus:outline-none"></div>
+          <div><label class="text-xs font-medium block mb-1">Expected Monthly Fiat Income (USD)</label><input type="number" id="ob-income" placeholder="e.g. 1200" class="w-full border rounded-md p-3 focus:ring-2 focus:ring-gray-900 focus:outline-none"></div>
+          <div><label class="text-xs font-medium block mb-1">BTC Holdings (USD equivalent)</label><input type="number" id="ob-btc-usd" placeholder="e.g. 5000" oninput="onboardingBtcChange()" class="w-full border rounded-md p-3 focus:ring-2 focus:ring-gray-900 focus:outline-none"><p class="text-xs text-gray-400 mt-1" id="ob-btc-preview">≈ 0 BTC</p></div>
+        </div>
+        <button onclick="finishOnboarding()" class="w-full bg-gray-900 text-white rounded-lg py-4 text-sm font-medium hover:bg-gray-800 flex justify-center items-center gap-2 shadow-lg">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 8 12 2 6 8 2 12"/><polyline points="18 8 18 22 6 22 6 8"/></svg>
+          Go to Dashboard
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== DASHBOARD ========== -->
+  <div id="app-dashboard" class="hidden">
+    <nav class="border-b border-gray-200 bg-white sticky top-0 z-40">
+      <div class="max-w-4xl mx-auto px-6">
+        <div class="py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div class="font-semibold tracking-tight text-lg flex items-center gap-2">
+            <svg class="w-5 h-5" viewBox="0 0 64 64" fill="none">
+              <rect x="8" y="12" width="48" height="10" rx="4" fill="#8B5E3C"/>
+              <rect x="8" y="27" width="48" height="10" rx="4" fill="#ea580c"/>
+              <rect x="8" y="42" width="48" height="10" rx="4" fill="#8B5E3C"/>
+            </svg>
+            Raft <span class="text-gray-400 font-normal text-sm ml-1 border-l pl-2">v2.0 beta</span>
+            <span class="ml-2 hidden sm:flex items-center gap-1 px-2 py-0.5 rounded bg-green-50 text-green-700 text-[10px] uppercase font-bold tracking-wider border border-green-100">
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Local
+            </span>
+          </div>
+          <div class="flex items-center gap-4">
+            <select id="currency-selector" onchange="changeCurrency()" class="text-xs border rounded px-2 py-1 hidden sm:block">
+              <option value="usd">USD</option>
+              <option value="eur">EUR</option>
+              <option value="gbp">GBP</option>
+              <option value="cad">CAD</option>
+              <option value="jpy">JPY</option>
+            </select>
+            <div id="live-price-widget" class="text-xs font-mono text-gray-500 bg-gray-50 px-2 py-1 rounded border border-gray-100 hidden sm:flex items-center gap-1">
+              BTC: <span id="nav-btc-price">Fetching...</span>
+            </div>
+            <div class="h-4 w-px bg-gray-200 hidden sm:block"></div>
+            <button onclick="toggleDark()" class="text-gray-400 hover:text-gray-900 transition-colors" title="Toggle dark mode">
+              <svg id="dark-icon" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+              </svg>
+            </button>
+            <button onclick="togglePrivacy()" class="text-gray-400 hover:text-gray-900 transition-colors flex items-center gap-1 text-sm font-medium" title="Toggle Privacy">
+              <svg id="privacy-icon" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 21c-4.97 0-9-3.03-9-7 0-3.97 4.03-7 9-7a10.07 10.07 0 0 1 5.94 2.06M3 3l18 18"/></svg>
+            </button>
+            <button onclick="window.print()" class="text-gray-400 hover:text-gray-900 transition-colors" title="Print Snapshot">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 12H4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            </button>
+            <input type="file" id="import-file" class="hidden" accept=".json" onchange="importData(event)">
+            <button onclick="document.getElementById('import-file').click()" class="text-gray-400 hover:text-gray-900 transition-colors" title="Import Data">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </button>
+            <button onclick="exportDataPrompt()" class="text-gray-400 hover:text-gray-900 transition-colors" title="Export Data">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </button>
+            <button onclick="resetSetup()" class="text-red-400 hover:text-red-600 transition-colors" title="Reset App">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-6 py-8 flex flex-col gap-8 mb-20">
+      <!-- STATUS CARD (dual readout + goal progress) -->
+      <section id="status-card" class="p-8 rounded-xl border flex flex-col gap-6 transition-colors duration-300 bg-white">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xs font-bold tracking-widest text-gray-500 uppercase">Your Position</h2>
+          <div id="status-badge" class="flex items-center gap-2 font-medium text-sm px-3 py-1 rounded-full bg-white border border-gray-200 text-gray-700">
+            <span id="status-text">Loading...</span>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div class="bg-gray-50 rounded-xl p-5 border border-gray-100">
+            <div class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">Fiat Runway</div>
+            <div id="runway-main" class="text-4xl font-light tracking-tight text-gray-900">--</div>
+            <div id="runway-sub" class="text-sm text-gray-500 mt-1"></div>
+            <div class="mt-3 bg-gray-200 rounded-full h-2 w-full">
+              <div id="runway-bar-fill" class="h-2 rounded-full" style="width: 100%;"></div>
+            </div>
+            <div id="runway-bar-label" class="text-xs text-gray-500 mt-1">--</div>
+            <!-- Inflation awareness line -->
+            <div id="inflation-line" class="text-xs text-gray-500 mt-2 hidden">--</div>
+          </div>
+          <div class="bg-orange-50/50 rounded-xl p-5 border border-orange-100 flex flex-col gap-4">
+            <div>
+              <div class="text-xs text-orange-600 uppercase tracking-wider font-semibold mb-2">Monthly BTC Capacity</div>
+              <div id="capacity-main" class="text-4xl font-light tracking-tight text-orange-700">--</div>
+              <div id="capacity-sub" class="text-sm text-orange-500 mt-1"></div>
+            </div>
+            <!-- Reverse goal-setting (Phase C) -->
+            <div class="mt-4 pt-4 border-t border-orange-200">
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-orange-600 uppercase tracking-wider font-semibold">Monthly Goal</span>
+                <button onclick="openGoalModal()" class="text-orange-700 hover:text-orange-800 text-xs underline">Set Goal</button>
+              </div>
+              <div class="flex items-center gap-3 mt-2">
+                <svg class="goal-ring" width="48" height="48" viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--border)" stroke-width="2"></circle>
+                  <circle id="goal-progress" cx="18" cy="18" r="15.5" fill="none" stroke="var(--accent)" stroke-width="3" stroke-dasharray="100" stroke-dashoffset="100" stroke-linecap="round"></circle>
+                </svg>
+                <div>
+                  <div id="goal-display" class="text-sm font-semibold">No goal set</div>
+                  <div class="text-xs text-gray-500">of monthly target</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="status-msg" class="text-sm font-medium pt-2 border-t text-gray-600"></div>
+        <div id="history-panel" class="mt-4 pt-4 border-t border-gray-100 hidden">
+          <h4 class="text-xs font-semibold text-gray-500 uppercase mb-2">Runway History</h4>
+          <div id="history-bars" class="flex items-end gap-1 h-12"></div>
+          <div class="text-xs text-gray-400 mt-1">Past 6 snapshots</div>
+        </div>
+      </section>
+
+      <!-- LIQUIDITY & BILLS -->
+      <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="border border-gray-200 bg-white rounded-xl p-6 flex flex-col gap-6 shadow-sm">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-semibold flex items-center gap-2">
+              <svg class="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              Liquidity & Cashflow
+            </h3>
+            <button onclick="openPositionModal()" class="text-gray-400 hover:text-gray-900 transition-colors" title="Update position">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </button>
+          </div>
+          <div class="flex flex-col gap-4">
+            <div class="flex justify-between items-end border-b border-gray-100 pb-3"><span class="text-sm text-gray-500">Current Fiat</span><span class="text-xl font-medium sensitive-data" id="display-fiat">$0</span></div>
+            <div class="flex justify-between items-end border-b border-gray-100 pb-3"><span class="text-sm text-gray-500">Expected Income</span><span class="text-lg font-medium text-green-600 sensitive-data" id="display-income">+$0</span></div>
+            <div class="flex justify-between items-end pb-1 border-b border-gray-100"><span class="text-sm font-medium">Monthly Net</span><span class="text-xl font-bold sensitive-data" id="display-net-cashflow">$0</span></div>
+            <div class="flex justify-between items-end pt-1" id="btc-bridge-container"><span class="text-sm font-medium text-orange-600 flex items-center gap-1.5"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg> BTC spent on bills</span><span class="text-lg font-bold text-orange-600 sensitive-data" id="display-btc-bridge">0.0000 BTC/mo</span></div>
+            <div class="flex justify-between items-end pt-2 border-t border-gray-100">
+              <span class="text-sm font-medium">Total BTC</span>
+              <span class="text-lg font-bold sensitive-data" id="display-total-btc">0.0000 BTC</span>
+            </div>
+            <!-- CSV import button (Phase C) -->
+            <div class="pt-2 border-t border-gray-100">
+              <label class="text-xs text-gray-500 cursor-pointer hover:text-gray-700">
+                <input type="file" id="csv-import-file" accept=".csv" onchange="importCSV(event)" class="hidden">
+                Import bank CSV to auto-add bills
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="border border-gray-200 bg-white rounded-xl p-6 flex flex-col gap-6 shadow-sm">
+          <h3 class="text-sm font-semibold flex items-center justify-between">
+            <div class="flex items-center gap-2"><svg class="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Bills</div>
+            <button onclick="openManageModal()" class="text-xs text-gray-500 hover:text-gray-900 border border-gray-200 px-2 py-1 rounded">Manage</button>
+          </h3>
+          <div id="bills-list" class="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1">
+            <div class="text-sm text-gray-400 italic">No bills yet. <button onclick="openManageModal()" class="underline hover:text-gray-700">Add your first bill</button> to see your runway.</div>
+          </div>
+          <div class="mt-auto pt-4 border-t border-gray-100 flex justify-between items-center">
+            <span class="text-xs text-gray-500 font-medium" id="next-due-alert">No bills added yet.</span>
+            <span class="text-xs text-gray-400 font-medium">Fiat Bills: <span id="display-obligations-total" class="sensitive-data text-gray-900">$0</span></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- WALLET SWEEP (with mempool fee placeholder) -->
+      <div class="border border-gray-200 bg-white rounded-xl p-6 shadow-sm">
+        <h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
+          <svg class="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10h18"/></svg>
+          Wallet Sweep
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
+            <div class="text-xs text-gray-500 mb-1">Cold (long-term)</div>
+            <div class="text-lg font-semibold sensitive-data" id="sweep-cold">0.0000 BTC</div>
+          </div>
+          <div class="bg-orange-50/50 p-3 rounded-lg border border-orange-100">
+            <div class="text-xs text-orange-600 mb-1">Liquid (exchange)</div>
+            <div class="text-lg font-semibold sensitive-data" id="sweep-liquid">0.0000 BTC</div>
+          </div>
+          <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
+            <div class="text-xs text-gray-500 mb-1">Mobile (spending)</div>
+            <div class="text-lg font-semibold sensitive-data" id="sweep-mobile">0.0000 BTC</div>
+          </div>
+        </div>
+        <div id="sweep-message" class="mt-4 text-sm text-gray-700"></div>
+        <!-- DEVELOPER NOTE: Mempool.space fee check can be added here:
+             fetch('https://mempool.space/api/v1/fees/recommended') and display "Moving to cold storage costs ~X sats now" -->
+      </div>
+
+      <!-- WHAT-IF TESTING -->
+      <div class="border border-gray-200 bg-white rounded-xl p-6 flex flex-col gap-6 shadow-sm">
+        <h3 class="text-sm font-semibold flex items-center gap-2 border-b border-gray-100 pb-4">
+          <svg class="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          What-If Testing
+        </h3>
+        <div class="flex gap-3 mb-2">
+          <button id="whatif-linked-btn" class="whatif-tab px-4 py-2 rounded-md text-sm active" onclick="setWhatIfMode('linked')">Linked (My Stack)</button>
+          <button id="whatif-sim-btn" class="whatif-tab px-4 py-2 rounded-md text-sm" onclick="setWhatIfMode('sim')">Simulation (Scratchpad)</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="text-xs text-gray-500 block mb-1">Action</label>
+            <select id="whatif-action" onchange="updateWhatIf()" class="w-full border text-sm rounded-md p-2 focus:ring-1 focus:ring-gray-900">
+              <option value="buy">Buy BTC (Spend Fiat)</option>
+              <option value="sell">Sell BTC (Receive Fiat)</option>
+              <option value="hold">Hold (Forecast Value)</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs text-gray-500 block mb-1" id="whatif-amt-label">Amount</label>
+            <div class="flex items-center gap-2">
+              <input type="number" id="whatif-amount" oninput="updateWhatIf()" placeholder="0" class="flex-1 border rounded-md p-2 text-sm focus:ring-1 focus:ring-gray-900">
+              <button onclick="fillMaxWhatIf()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded font-medium" id="max-fill-btn" style="display:none;">Max</button>
+            </div>
+            <div class="text-[10px] text-gray-400 mt-1" id="available-hint">Available: --</div>
+          </div>
+          <div class="md:col-span-2">
+            <label class="text-xs text-gray-500 block mb-1">BTC Price (<span id="currency-label">USD</span>)</label>
+            <input type="number" id="whatif-price" oninput="updateWhatIf()" class="w-full border rounded-md p-2 text-sm focus:ring-1 focus:ring-gray-900">
+          </div>
+          <div class="md:col-span-2 bg-gray-50 rounded-lg p-4 text-sm text-gray-700" id="whatif-result">Your total BTC stack is worth … at the current price.</div>
+        </div>
+      </div>
+
+      <!-- TAX AWARENESS -->
+      <div class="border border-gray-200 bg-white rounded-xl p-6 shadow-sm">
+        <h3 class="text-sm font-semibold mb-3">Tax Awareness</h3>
+        <p class="text-xs text-gray-500 mb-2">Selling or spending Bitcoin may create taxable events in your jurisdiction. This list includes any bills paid via BTC bridge.</p>
+        <div id="tax-events-list" class="text-sm"></div>
+      </div>
+
+      <!-- DISCLAIMER -->
+      <div class="text-xs text-gray-400 text-center pt-2 border-t border-gray-100">
+        This tool does not provide tax, legal, or financial advice. Consult a qualified professional.
+      </div>
+    </main>
+  </div>
+
+  <!-- MODALS (Update Position, Manage Bills, Goal Setting) -->
+  <div id="position-modal" class="hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm overflow-y-auto z-50">
+    <div class="min-h-screen flex items-center justify-center p-4">
+      <div class="bg-white rounded-xl shadow-2xl border border-gray-200 p-6 w-full max-w-md animate-fade-in my-8">
+        <h2 class="text-lg font-semibold mb-4">Update Position</h2>
+        <div class="flex flex-col gap-4">
+          <div><label class="text-xs font-medium block mb-1">Current Fiat (<span class="currency-label">USD</span>)</label><input type="number" id="upd-fiat" class="w-full border rounded-md p-2"></div>
+          <div><label class="text-xs font-medium block mb-1">Monthly Income (<span class="currency-label">USD</span>)</label><input type="number" id="upd-income" class="w-full border rounded-md p-2"></div>
+          <div class="grid grid-cols-3 gap-3">
+            <div><label class="text-xs font-medium block mb-1">Cold BTC</label><input type="number" step="0.00000001" id="upd-btc-cold" class="w-full border rounded-md p-2"></div>
+            <div><label class="text-xs font-medium text-orange-700 block mb-1">Liquid BTC</label><input type="number" step="0.00000001" id="upd-btc-liquid" class="w-full border border-orange-200 rounded-md p-2 bg-orange-50"></div>
+            <div><label class="text-xs font-medium block mb-1">Mobile BTC</label><input type="number" step="0.00000001" id="upd-btc-mobile" class="w-full border rounded-md p-2"></div>
+          </div>
+        </div>
+        <div class="flex justify-end gap-3 mt-6 border-t border-gray-100 pt-4">
+          <button onclick="closePositionModal()" class="px-4 py-2 text-sm font-medium hover:text-gray-900">Cancel</button>
+          <button onclick="savePosition()" class="px-5 py-2 bg-gray-900 text-white rounded-md text-sm font-medium hover:bg-gray-800">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="manage-modal" class="hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm overflow-y-auto z-50">
+    <div class="min-h-screen flex items-center justify-center p-4">
+      <div class="bg-white rounded-xl shadow-2xl border border-gray-200 p-6 w-full max-w-xl animate-fade-in my-8">
+        <h2 class="text-lg font-semibold mb-4">Manage Bills</h2>
+        <div class="flex flex-col gap-6">
+          <div><h3 class="text-sm font-medium mb-2">Current Bills</h3><div id="modal-bill-list" class="flex flex-col gap-2 max-h-40 overflow-y-auto"></div></div>
+          <div class="border-t border-gray-100 pt-4">
+            <h3 class="text-sm font-medium mb-3" id="form-title">Add a Bill</h3>
+            <div class="grid grid-cols-2 gap-3 mb-3">
+              <div><label class="text-xs font-medium block mb-1">Name</label><input type="text" id="bill-form-name" class="w-full border rounded-md p-2 text-sm"></div>
+              <div><label class="text-xs font-medium block mb-1">Amount (<span class="currency-label">USD</span>)</label><input type="number" id="bill-form-amount" class="w-full border rounded-md p-2 text-sm"></div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mb-3">
+              <div><label class="text-xs font-medium block mb-1">Settlement</label>
+                <select id="bill-form-method" class="w-full border rounded-md p-2 text-sm">
+                  <option value="fiat">Fiat (Bank/Card)</option>
+                  <option value="bridge">Bridge (BTC via service)</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-xs font-medium block mb-1">Day of Month</label>
+                <div id="day-display" class="w-full border rounded-md p-2 text-sm bg-gray-50 flex items-center justify-between cursor-pointer" onclick="toggleMiniCalendar()">
+                  <span id="selected-day-text">Choose day</span>
+                  <svg class="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                <div id="mini-calendar" class="hidden mt-1 p-2 border border-gray-200 rounded-lg bg-white shadow-sm w-full">
+                  <div class="flex justify-between items-center mb-2">
+                    <button onclick="changeCalendarMonth(-1)" class="text-gray-500 hover:text-gray-900"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+                    <span id="cal-month-year" class="text-sm font-medium"></span>
+                    <button onclick="changeCalendarMonth(1)" class="text-gray-500 hover:text-gray-900"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+                  </div>
+                  <div class="grid grid-cols-7 gap-1 text-center text-xs" id="cal-days-header"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span></div>
+                  <div class="grid grid-cols-7 gap-1 mt-1" id="cal-grid"></div>
+                </div>
+              </div>
+            </div>
+            <div class="flex gap-3 justify-end">
+              <button onclick="cancelEdit()" class="px-4 py-2 text-sm font-medium hover:text-gray-900 hidden" id="cancel-edit-btn">Cancel Edit</button>
+              <button onclick="saveBillFromForm()" class="px-5 py-2 bg-gray-900 text-white rounded-md text-sm font-medium hover:bg-gray-800">Save Bill</button>
+            </div>
+          </div>
+        </div>
+        <div class="flex justify-end border-t border-gray-100 pt-4 mt-4">
+          <button onclick="closeManageModal()" class="px-4 py-2 text-sm font-medium hover:text-gray-900">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="goal-modal" class="hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm overflow-y-auto z-50">
+    <div class="min-h-screen flex items-center justify-center p-4">
+      <div class="bg-white rounded-xl shadow-2xl border border-gray-200 p-6 w-full max-w-sm animate-fade-in my-8">
+        <h2 class="text-lg font-semibold mb-4">Set Monthly Stacking Goal</h2>
+        <div class="flex flex-col gap-4">
+          <div><label class="text-xs font-medium block mb-1">Sats per month</label><input type="number" id="goal-input" placeholder="e.g. 2000000" class="w-full border rounded-md p-2"></div>
+          <p class="text-xs text-gray-500">This goal is for you only. Raft will show your progress, no judgment.</p>
+        </div>
+        <div class="flex justify-end gap-3 mt-6 border-t border-gray-100 pt-4">
+          <button onclick="closeGoalModal()" class="px-4 py-2 text-sm font-medium hover:text-gray-900">Cancel</button>
+          <button onclick="saveGoal()" class="px-5 py-2 bg-gray-900 text-white rounded-md text-sm font-medium hover:bg-gray-800">Save Goal</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---------- GLOBALS ----------
+    const STORAGE_KEY = 'raft_v2_data';
+    const ONBOARDED_KEY = 'raft_onboarded';
+    let data = {
+      fiat: 0, income: 0,
+      btc: { cold: 0, liquid: 0, mobile: 0 },
+      obligations: [], // { id, name, amount, day, method }
+      telemetry: { firstVisit: new Date().toISOString(), lastVisit: '', viewCount: 0, updateCount: 0, exportCount: 0, importCount: 0 },
+      history: [], // { date, runwayMonths, totalBtc }
+      goalSats: 0 // Phase C: monthly stacking goal in sats
+    };
+    let isPrivacy = false;
+    let liveBtcPrice = 0;
+    let activeWhatIfMode = 'linked';
+    let calYear = new Date().getFullYear();
+    let calMonth = new Date().getMonth();
+    let selectedDay = null;
+    let editingBillId = null;
+    let userCurrency = localStorage.getItem('raft_currency') || 'usd';
+
+    function init() {
+      if (localStorage.getItem('raft_dark') === 'true') {
+        document.documentElement.classList.add('dark');
+      }
+      document.getElementById('currency-selector').value = userCurrency;
+      updateCurrencyLabels();
+      const hasOnboarded = localStorage.getItem(ONBOARDED_KEY);
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          data = { ...data, ...parsed };
+          data.btc = { cold: 0, liquid: 0, mobile: 0, ...(parsed.btc || {}) };
+          data.obligations = Array.isArray(parsed.obligations) ? parsed.obligations : [];
+          data.history = parsed.history || [];
+          data.goalSats = parsed.goalSats || 0;
+        }
+      } catch (e) {}
+      if (hasOnboarded) {
+        document.getElementById('onboarding-flow').classList.add('hidden');
+        document.getElementById('app-dashboard').classList.remove('hidden');
+        data.telemetry.lastVisit = new Date().toISOString();
+        data.telemetry.viewCount++;
+        saveData();
+        fetchCoinGeckoPrice().then(() => {
+          renderAll();
+          fetchInflationData(); // Phase C: inflation awareness
+        });
+      } else {
+        document.getElementById('onboarding-flow').classList.remove('hidden');
+        document.getElementById('app-dashboard').classList.add('hidden');
+      }
+    }
+
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      console.log('[Raft Heartbeat]', JSON.parse(JSON.stringify(data)));
+    }
+
+    // ---------- BTC PRICE + CURRENCY ----------
+    async function fetchCoinGeckoPrice() {
+      try {
+        const vs = userCurrency === 'usd' ? 'usd' : `usd,${userCurrency}`;
+        const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=${vs}`);
+        const json = await res.json();
+        if (json.bitcoin && json.bitcoin.usd) {
+          liveBtcPrice = json.bitcoin[userCurrency] || json.bitcoin.usd;
+          document.getElementById('nav-btc-price').innerText = formatCurrency(liveBtcPrice);
+          document.getElementById('whatif-price').value = liveBtcPrice;
+        }
+      } catch (e) { document.getElementById('nav-btc-price').innerText = 'Offline'; }
+    }
+
+    async function fetchInflationData() {
+      try {
+        const res = await fetch('https://api.bls.gov/publicAPI/v2/timeseries/data/CUUR0000SA0', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ seriesid: ['CUUR0000SA0'], startyear: new Date().getFullYear()-1, endyear: new Date().getFullYear() })
+        });
+        const json = await res.json();
+        if (json.Results && json.Results.series) {
+          const dataPoints = json.Results.series[0].data;
+          if (dataPoints.length >= 2) {
+            const latest = parseFloat(dataPoints[0].value);
+            const yearAgo = parseFloat(dataPoints[11]?.value || dataPoints[dataPoints.length-1].value);
+            const inflationRate = ((latest - yearAgo) / yearAgo * 100).toFixed(1);
+            const line = document.getElementById('inflation-line');
+            line.classList.remove('hidden');
+            line.innerText = `US inflation rate: ${inflationRate}%. Your cash loses about $${Math.round(data.fiat * inflationRate / 100).toLocaleString()} of buying power per year.`;
+          }
+        }
+      } catch (e) { /* silent fail */ }
+    }
+
+    function formatCurrency(val) {
+      const sym = { usd: '$', eur: '€', gbp: '£', cad: 'C$', jpy: '¥' }[userCurrency] || '$';
+      return sym + val.toLocaleString();
+    }
+    function updateCurrencyLabels() {
+      document.querySelectorAll('.currency-label').forEach(el => el.innerText = userCurrency.toUpperCase());
+      document.getElementById('currency-label').innerText = userCurrency.toUpperCase();
+    }
+    function changeCurrency() {
+      userCurrency = document.getElementById('currency-selector').value;
+      localStorage.setItem('raft_currency', userCurrency);
+      updateCurrencyLabels();
+      fetchCoinGeckoPrice().then(renderAll);
+    }
+
+    // ---------- DARK MODE ----------
+    function toggleDark() {
+      document.documentElement.classList.toggle('dark');
+      const isDark = document.documentElement.classList.contains('dark');
+      localStorage.setItem('raft_dark', isDark);
+    }
+
+    // ---------- ONBOARDING (unchanged) ----------
+    function selectIncome(el) {
+      document.querySelectorAll('#ob-step-1 .selectable-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+    function goToObStep(step) {
+      ['1','2'].forEach(s => document.getElementById(`ob-step-${s}`).classList.add('hidden'));
+      document.getElementById(`ob-step-${step}`).classList.remove('hidden');
+      if (step === 2) fetchCoinGeckoPrice().then(() => onboardingBtcChange());
+    }
+    function onboardingBtcChange() {
+      const btcUsd = parseFloat(document.getElementById('ob-btc-usd').value) || 0;
+      if (liveBtcPrice > 0) document.getElementById('ob-btc-preview').innerText = `≈ ${(btcUsd / liveBtcPrice).toFixed(5)} BTC (${Math.round(btcUsd / liveBtcPrice * 1e8).toLocaleString()} sats)`;
+    }
+    function finishOnboarding() {
+      data.fiat = parseFloat(document.getElementById('ob-fiat').value) || 0;
+      data.income = parseFloat(document.getElementById('ob-income').value) || 0;
+      const btcUsd = parseFloat(document.getElementById('ob-btc-usd').value) || 0;
+      if (liveBtcPrice > 0 && btcUsd > 0) data.btc.liquid = btcUsd / liveBtcPrice;
+      localStorage.setItem(ONBOARDED_KEY, 'true');
+      saveData();
+      document.getElementById('onboarding-flow').classList.add('hidden');
+      document.getElementById('app-dashboard').classList.remove('hidden');
+      renderAll();
+    }
+    function resetSetup() {
+      if (confirm('Erase all local data and restart onboarding?')) {
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(ONBOARDED_KEY);
+        location.reload();
+      }
+    }
+
+    // ---------- HELPERS ----------
+    function getFiatBills() { return data.obligations.filter(o => o.method === 'fiat'); }
+    function getBridgeBills() { return data.obligations.filter(o => o.method === 'bridge'); }
+    function fmtF(v) { return isPrivacy ? '****' : formatCurrency(Math.abs(v)); }
+    function fmtB(v) { return isPrivacy ? '****' : v.toFixed(4) + ' BTC'; }
+    function fmtSats(v) {
+      if (isPrivacy) return '**** sats';
+      const sats = Math.round(v * 1e8);
+      if (sats >= 1e6) return (sats / 1e6).toFixed(1) + 'M sats';
+      if (sats >= 1e3) return (sats / 1e3).toFixed(0) + 'K sats';
+      return sats.toLocaleString() + ' sats';
+    }
+
+    function calculatePosition() {
+      const fiatBills = getFiatBills();
+      const fiatObs = fiatBills.reduce((s, o) => s + o.amount, 0);
+      const net = data.income - fiatObs;
+      const bridgeBills = getBridgeBills();
+      const bridgeObs = bridgeBills.reduce((s, o) => s + o.amount, 0);
+      const btcBridgeSpend = (liveBtcPrice > 0 && bridgeObs > 0) ? bridgeObs / liveBtcPrice : 0;
+      let runwayMonths = null, decisionDate = null, hasSurplus = false;
+      if (fiatObs === 0 && data.income > 0) {
+        hasSurplus = true;
+        runwayMonths = data.fiat > 0 ? data.fiat / (data.income || 1) : null;
+      } else if (net >= 0) {
+        hasSurplus = true;
+        runwayMonths = fiatObs > 0 ? data.fiat / fiatObs : (data.fiat > 0 ? 999 : null);
+      } else {
+        hasSurplus = false;
+        const monthlyShortfall = Math.abs(net);
+        runwayMonths = data.fiat / monthlyShortfall;
+        decisionDate = new Date(Date.now() + runwayMonths * 30 * 86400000);
+      }
+      const monthlyBtcCapacity = (hasSurplus && liveBtcPrice > 0) ? Math.max(0, net) / liveBtcPrice : 0;
+      return { fiatObs, net, bridgeObs, btcBridgeSpend, hasSurplus, runwayMonths, decisionDate, monthlyBtcCapacity };
+    }
+
+    // ---------- RENDER ALL ----------
+    function renderAll() {
+      renderDashboard();
+      renderBillsList();
+      renderWalletSweep();
+      renderTaxAwareness();
+      renderHistory();
+      updateWhatIf();
+      updateGoalDisplay();
+    }
+
+    function animateNumber(el) {
+      el.classList.add('animate-number');
+      setTimeout(() => el.classList.remove('animate-number'), 300);
+    }
+
+    function renderDashboard() {
+      const pos = calculatePosition();
+      const { fiatObs, net, bridgeObs, btcBridgeSpend, hasSurplus, runwayMonths, decisionDate, monthlyBtcCapacity } = pos;
+      const fiatEl = document.getElementById('display-fiat');
+      fiatEl.innerText = fmtF(data.fiat); animateNumber(fiatEl);
+      document.getElementById('display-income').innerText = fmtF(data.income);
+      const netDisplay = document.getElementById('display-net-cashflow');
+      if (net > 0) netDisplay.innerHTML = `<span class="text-green-600">+${fmtF(net)}</span><span class="text-sm text-green-500 font-normal">/mo</span>`;
+      else if (net < 0) netDisplay.innerHTML = `<span class="text-red-500">−${fmtF(Math.abs(net))}</span><span class="text-sm text-red-400 font-normal">/mo</span>`;
+      else netDisplay.innerHTML = `<span>${fmtF(0)}</span><span class="text-sm text-gray-400 font-normal">/mo</span>`;
+
+      const bridgeCont = document.getElementById('btc-bridge-container');
+      if (btcBridgeSpend > 0) { bridgeCont.classList.remove('hidden'); document.getElementById('display-btc-bridge').innerText = fmtB(btcBridgeSpend); }
+      else bridgeCont.classList.add('hidden');
+
+      const totalBtc = data.btc.cold + data.btc.liquid + data.btc.mobile;
+      document.getElementById('display-total-btc').innerHTML = `${fmtB(totalBtc)}<span class="text-xs text-gray-400 ml-1">≈ ${fmtF(totalBtc * liveBtcPrice)}</span>`;
+
+      const statusCard = document.getElementById('status-card');
+      const badge = document.getElementById('status-badge');
+      const statusText = document.getElementById('status-text');
+      const runwayMain = document.getElementById('runway-main');
+      const runwaySub = document.getElementById('runway-sub');
+      const capacityMain = document.getElementById('capacity-main');
+      const capacitySub = document.getElementById('capacity-sub');
+      const statusMsg = document.getElementById('status-msg');
+
+      const isLowRunway = !hasSurplus && runwayMonths !== null && runwayMonths < 3;
+      if (isLowRunway) {
+        statusCard.className = 'p-8 rounded-xl border flex flex-col gap-6 transition-colors duration-300 bg-orange-50 border-orange-200';
+        badge.className = 'flex items-center gap-2 font-medium text-sm px-3 py-1 rounded-full bg-white border border-orange-200 text-orange-700';
+        badge.innerHTML = '<svg class="w-5 h-5 text-orange-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Low Runway</span>';
+      } else {
+        statusCard.className = 'p-8 rounded-xl border flex flex-col gap-6 transition-colors duration-300 bg-white';
+        badge.className = 'flex items-center gap-2 font-medium text-sm px-3 py-1 rounded-full bg-white border border-gray-200 text-gray-700';
+        badge.innerHTML = '<svg class="w-5 h-5 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span>OK</span>';
+      }
+      statusText.innerText = isLowRunway ? 'Low Runway' : 'OK';
+
+      if (hasSurplus) {
+        if (fiatObs === 0 && data.income > 0 && data.fiat > 0) {
+          runwayMain.innerText = Math.round(runwayMonths) + ' months';
+          runwaySub.innerText = 'of income saved — no bills draining fiat';
+        } else if (fiatObs === 0 && data.income === 0 && data.fiat > 0) {
+          runwayMain.innerText = formatCurrency(data.fiat);
+          runwaySub.innerText = 'saved — add income or bills to see runway';
+        } else if (fiatObs === 0 && data.fiat === 0) {
+          runwayMain.innerText = '--';
+          runwaySub.innerText = 'No fiat data yet';
+        } else {
+          runwayMain.innerText = runwayMonths !== null ? Math.round(runwayMonths) + ' months' : '--';
+          runwaySub.innerText = 'of bills covered by savings';
+        }
+      } else {
+        const days = runwayMonths !== null ? Math.round(runwayMonths * 30) : 0;
+        runwayMain.innerText = days + ' days';
+        runwaySub.innerText = decisionDate ? 'Decision point: ' + decisionDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+      }
+
+      // Runway progress bar
+      if (data.history.length > 0) {
+        const initialRunway = data.history[0].runwayMonths;
+        if (initialRunway && initialRunway > 0) {
+          const barPercent = Math.min(100, Math.max(0, (runwayMonths / initialRunway) * 100));
+          document.getElementById('runway-bar-fill').style.width = barPercent + '%';
+          document.getElementById('runway-bar-label').innerText = barPercent.toFixed(0) + '% of original runway';
+        }
+      } else {
+        document.getElementById('runway-bar-fill').style.width = '100%';
+        document.getElementById('runway-bar-label').innerText = 'Snapshot saved on next update';
+      }
+
+      if (hasSurplus && monthlyBtcCapacity > 0) {
+        capacityMain.innerText = fmtSats(monthlyBtcCapacity);
+        capacitySub.innerText = '≈ ' + monthlyBtcCapacity.toFixed(5) + ' BTC/month';
+      } else if (hasSurplus && net === 0) {
+        capacityMain.innerText = '--';
+        capacitySub.innerText = 'Income exactly matches bills';
+      } else if (!hasSurplus) {
+        capacityMain.innerText = '--';
+        capacitySub.innerText = 'No surplus for stacking right now';
+      } else {
+        capacityMain.innerText = '--';
+        capacitySub.innerText = 'Add income and bills';
+      }
+
+      if (hasSurplus && monthlyBtcCapacity > 0) statusMsg.innerText = 'Your income covers your fiat bills.';
+      else if (hasSurplus && net === 0) statusMsg.innerText = 'Your income matches your bills exactly.';
+      else if (!hasSurplus && runwayMonths !== null) statusMsg.innerText = `Your fiat is on track to run out around ${decisionDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} if income and bills stay the same.`;
+      else statusMsg.innerText = 'Add your income and bills to see your position.';
+    }
+
+    // Phase C: Reverse goal-setting
+    function updateGoalDisplay() {
+      const display = document.getElementById('goal-display');
+      const ring = document.getElementById('goal-progress');
+      if (!data.goalSats || data.goalSats <= 0) {
+        display.innerText = 'No goal set';
+        ring.setAttribute('stroke-dashoffset', '100');
+        return;
+      }
+      const capacitySats = (calculatePosition().monthlyBtcCapacity || 0) * 1e8;
+      const pct = Math.min(100, (capacitySats / data.goalSats) * 100);
+      ring.setAttribute('stroke-dashoffset', 100 - pct);
+      display.innerText = `${pct.toFixed(0)}% of ${fmtSats(data.goalSats / 1e8)}`;
+    }
+
+    function openGoalModal() {
+      document.getElementById('goal-input').value = data.goalSats || '';
+      document.getElementById('goal-modal').classList.remove('hidden');
+    }
+    function closeGoalModal() { document.getElementById('goal-modal').classList.add('hidden'); }
+    function saveGoal() {
+      const val = parseInt(document.getElementById('goal-input').value) || 0;
+      data.goalSats = val;
+      saveData();
+      closeGoalModal();
+      updateGoalDisplay();
+    }
+
+    // Phase C: History sparkline
+    function renderHistory() {
+      const panel = document.getElementById('history-panel');
+      const bars = document.getElementById('history-bars');
+      if (data.history.length < 2) { panel.classList.add('hidden'); return; }
+      panel.classList.remove('hidden');
+      const maxRunway = Math.max(...data.history.map(h => h.runwayMonths), 1);
+      bars.innerHTML = data.history.slice(-6).map(h => {
+        const pct = (h.runwayMonths / maxRunway) * 100;
+        const date = new Date(h.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return `<div class="flex-1 bg-gray-200 rounded-t" style="height:${pct}%" title="${date}: ${h.runwayMonths.toFixed(1)} months"></div>`;
+      }).join('');
+    }
+
+    // Phase C: CSV import
+    function importCSV(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const lines = e.target.result.split('\n');
+        const bills = [];
+        for (let i = 1; i < lines.length; i++) {
+          const cols = lines[i].split(',');
+          if (cols.length < 3) continue;
+          const desc = cols[1]?.replace(/"/g, '').trim();
+          const amount = parseFloat(cols[2]);
+          if (desc && !isNaN(amount) && amount < 0) {
+            bills.push({ name: desc, amount: Math.abs(amount) });
+          }
+        }
+        if (bills.length > 0 && confirm(`Found ${bills.length} potential bills. Add them?`)) {
+          bills.forEach(b => {
+            data.obligations.push({ id: Date.now() + Math.random(), name: b.name, amount: b.amount, method: 'fiat', day: 1 });
+          });
+          saveData();
+          renderAll();
+          renderModalBillList();
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function renderWalletSweep() {
+      const cold = data.btc.cold;
+      const liquid = data.btc.liquid;
+      const mobile = data.btc.mobile;
+      document.getElementById('sweep-cold').innerText = fmtB(cold);
+      document.getElementById('sweep-liquid').innerText = fmtB(liquid);
+      document.getElementById('sweep-mobile').innerText = fmtB(mobile);
+      const msgEl = document.getElementById('sweep-message');
+      if (liquid > 0 && liquid > (cold + mobile) * 0.3) {
+        msgEl.innerHTML = `<span class="text-orange-700">⚠️ ${fmtB(liquid)} is on an exchange – that's a large portion of your stack. Consider sweeping to cold storage for safety.</span>`;
+      } else if (liquid > 0) {
+        msgEl.innerHTML = `<span class="text-gray-600">You have ${fmtB(liquid)} on an exchange. If you don't need it for immediate spending, moving it to cold storage keeps it safer.</span>`;
+      } else {
+        msgEl.innerHTML = `<span class="text-green-600">✅ All your BTC is in self‑custody.</span>`;
+      }
+    }
+
+    function renderBillsList() {
+      const container = document.getElementById('bills-list');
+      const allBills = [...data.obligations].sort((a, b) => a.day - b.day);
+      if (allBills.length === 0) {
+        container.innerHTML = '<div class="text-sm text-gray-400 italic">No bills yet. <button onclick="openManageModal()" class="underline hover:text-gray-700">Add your first bill</button> to see your runway.</div>';
+        document.getElementById('next-due-alert').innerText = 'No bills added yet.';
+        document.getElementById('display-obligations-total').innerText = fmtF(0);
+        return;
+      }
+      const today = new Date().getDate();
+      let nextFiat = null, minDiff = 32;
+      container.innerHTML = allBills.map(b => {
+        let diff = b.day - today; if (diff < 0) diff += 30;
+        if (b.method === 'fiat' && diff < minDiff) { minDiff = diff; nextFiat = b; }
+        return `<div class="flex justify-between items-center text-sm border-b border-gray-50 pb-1">
+          <div class="flex items-center gap-2 w-1/2"><span class="text-[10px] font-bold text-gray-400 w-4">${b.day}</span><span class="truncate text-gray-700">${b.name}</span></div>
+          <span class="font-medium sensitive-data">${fmtF(b.amount)}</span>
+          <span class="text-[10px] ${b.method === 'bridge' ? 'text-orange-600 bg-orange-50' : 'text-gray-500 bg-gray-100'} px-1.5 py-0.5 rounded ml-1">${b.method === 'bridge' ? 'BTC' : 'Fiat'}</span>
+        </div>`;
+      }).join('');
+      document.getElementById('next-due-alert').innerText = nextFiat ? `Next fiat bill: ${nextFiat.name} on day ${nextFiat.day}` : 'No fiat bills in the calendar.';
+      document.getElementById('display-obligations-total').innerText = fmtF(getFiatBills().reduce((s, o) => s + o.amount, 0));
+    }
+
+    function renderTaxAwareness() {
+      const cont = document.getElementById('tax-events-list');
+      const bridgeBills = getBridgeBills();
+      if (bridgeBills.length === 0) {
+        cont.innerHTML = '<p class="text-xs text-gray-400 italic">No bills paid with BTC yet. When you start, they’ll appear here as potentially taxable events.</p>';
+        return;
+      }
+      let html = '<div class="flex flex-col gap-1">';
+      bridgeBills.forEach(b => {
+        html += `<div class="flex justify-between text-xs border-b border-gray-100 py-1">
+          <span>${b.name} (Day ${b.day})</span>
+          <span class="text-orange-700">$${b.amount} via BTC bridge</span>
+        </div>`;
+      });
+      html += '</div>';
+      cont.innerHTML = html;
+    }
+
+    // ---- UPDATE POSITION MODAL ----
+    function openPositionModal() {
+      document.getElementById('upd-fiat').value = data.fiat;
+      document.getElementById('upd-income').value = data.income;
+      document.getElementById('upd-btc-cold').value = data.btc.cold;
+      document.getElementById('upd-btc-liquid').value = data.btc.liquid;
+      document.getElementById('upd-btc-mobile').value = data.btc.mobile;
+      document.getElementById('position-modal').classList.remove('hidden');
+    }
+    function closePositionModal() { document.getElementById('position-modal').classList.add('hidden'); }
+    function savePosition() {
+      data.fiat = parseFloat(document.getElementById('upd-fiat').value) || 0;
+      data.income = parseFloat(document.getElementById('upd-income').value) || 0;
+      data.btc.cold = parseFloat(document.getElementById('upd-btc-cold').value) || 0;
+      data.btc.liquid = parseFloat(document.getElementById('upd-btc-liquid').value) || 0;
+      data.btc.mobile = parseFloat(document.getElementById('upd-btc-mobile').value) || 0;
+      const pos = calculatePosition();
+      data.history.push({ date: new Date().toISOString(), runwayMonths: pos.runwayMonths || 0, totalBtc: data.btc.cold + data.btc.liquid + data.btc.mobile });
+      if (data.history.length > 12) data.history.shift();
+      saveData();
+      closePositionModal();
+      renderAll();
+    }
+
+    // ---- MANAGE BILLS MODAL ----
+    function openManageModal() {
+      editingBillId = null;
+      document.getElementById('form-title').innerText = 'Add a Bill';
+      document.getElementById('cancel-edit-btn').classList.add('hidden');
+      clearBillForm();
+      renderModalBillList();
+      document.getElementById('manage-modal').classList.remove('hidden');
+    }
+    function closeManageModal() { document.getElementById('manage-modal').classList.add('hidden'); }
+    function renderModalBillList() {
+      const list = document.getElementById('modal-bill-list');
+      if (data.obligations.length === 0) { list.innerHTML = '<div class="text-sm text-gray-400 italic">No bills.</div>'; return; }
+      list.innerHTML = data.obligations.map(b => `
+        <div class="flex justify-between items-center border border-gray-100 p-2 rounded">
+          <div class="flex items-center gap-2"><span class="text-sm font-medium">${b.name}</span><span class="text-xs text-gray-500">Day ${b.day} — $${b.amount.toLocaleString()}</span><span class="text-[10px] ${b.method==='bridge'?'text-orange-600':'text-gray-500'} px-1 rounded">${b.method==='bridge'?'BTC':'Fiat'}</span></div>
+          <div class="flex gap-2">
+            <button onclick="editBill(${b.id})" class="text-xs text-gray-500 hover:text-gray-900"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
+            <button onclick="deleteBill(${b.id})" class="text-xs text-red-400 hover:text-red-600"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
+          </div>
+        </div>`).join('');
+    }
+    function clearBillForm() {
+      document.getElementById('bill-form-name').value = '';
+      document.getElementById('bill-form-amount').value = '';
+      document.getElementById('bill-form-method').value = 'fiat';
+      selectedDay = null;
+      document.getElementById('selected-day-text').innerText = 'Choose day';
+      updateMiniCalendar();
+    }
+    function editBill(id) {
+      const bill = data.obligations.find(b => b.id === id);
+      if (!bill) return;
+      editingBillId = id;
+      document.getElementById('form-title').innerText = 'Edit Bill';
+      document.getElementById('cancel-edit-btn').classList.remove('hidden');
+      document.getElementById('bill-form-name').value = bill.name;
+      document.getElementById('bill-form-amount').value = bill.amount;
+      document.getElementById('bill-form-method').value = bill.method;
+      selectedDay = bill.day;
+      document.getElementById('selected-day-text').innerText = selectedDay;
+      updateMiniCalendar();
+    }
+    function cancelEdit() {
+      editingBillId = null;
+      document.getElementById('form-title').innerText = 'Add a Bill';
+      document.getElementById('cancel-edit-btn').classList.add('hidden');
+      clearBillForm();
+    }
+    function deleteBill(id) {
+      data.obligations = data.obligations.filter(b => b.id !== id);
+      saveData();
+      renderModalBillList();
+      renderAll();
+    }
+    function saveBillFromForm() {
+      const name = document.getElementById('bill-form-name').value.trim();
+      const amount = parseFloat(document.getElementById('bill-form-amount').value);
+      const method = document.getElementById('bill-form-method').value;
+      if (!name || isNaN(amount) || !selectedDay) { alert('Please fill all fields and select a day.'); return; }
+      if (editingBillId) {
+        const idx = data.obligations.findIndex(b => b.id === editingBillId);
+        if (idx >= 0) data.obligations[idx] = { ...data.obligations[idx], name, amount, method, day: selectedDay };
+      } else {
+        data.obligations.push({ id: Date.now(), name, amount, method, day: selectedDay });
+      }
+      saveData();
+      cancelEdit();
+      clearBillForm();
+      renderModalBillList();
+      renderAll();
+    }
+
+    function toggleMiniCalendar() { document.getElementById('mini-calendar').classList.toggle('hidden'); updateMiniCalendar(); }
+    function changeCalendarMonth(delta) {
+      calMonth += delta;
+      if (calMonth < 0) { calMonth = 11; calYear--; }
+      if (calMonth > 11) { calMonth = 0; calYear++; }
+      updateMiniCalendar();
+    }
+    function updateMiniCalendar() {
+      document.getElementById('cal-month-year').innerText = `${new Date(calYear, calMonth).toLocaleString('default', { month: 'long' })} ${calYear}`;
+      const grid = document.getElementById('cal-grid');
+      const firstDay = new Date(calYear, calMonth, 1).getDay();
+      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+      let html = '';
+      for (let i = 0; i < firstDay; i++) html += '<div></div>';
+      for (let d = 1; d <= daysInMonth; d++) {
+        html += `<div class="mini-calendar-day ${selectedDay === d ? 'selected' : ''}" onclick="selectDay(${d})">${d}</div>`;
+      }
+      grid.innerHTML = html;
+    }
+    function selectDay(day) {
+      selectedDay = day;
+      document.getElementById('selected-day-text').innerText = day;
+      updateMiniCalendar();
+    }
+
+    // ---- ENHANCED WHAT-IF ----
+    function setWhatIfMode(mode) {
+      activeWhatIfMode = mode;
+      document.getElementById('whatif-linked-btn').classList.toggle('active', mode === 'linked');
+      document.getElementById('whatif-sim-btn').classList.toggle('active', mode === 'sim');
+      updateWhatIf();
+    }
+    function getMaxForAction() {
+      const action = document.getElementById('whatif-action').value;
+      if (action === 'buy') return data.fiat;
+      if (action === 'sell') return data.btc.liquid;
+      return 0;
+    }
+    function fillMaxWhatIf() {
+      const max = getMaxForAction();
+      if (max > 0) document.getElementById('whatif-amount').value = max;
+      updateWhatIf();
+    }
+    function updateWhatIf() {
+      const action = document.getElementById('whatif-action').value;
+      const amt = parseFloat(document.getElementById('whatif-amount').value) || 0;
+      const price = parseFloat(document.getElementById('whatif-price').value) || liveBtcPrice || 0;
+      const res = document.getElementById('whatif-result');
+      const availableHint = document.getElementById('available-hint');
+      const maxBtn = document.getElementById('max-fill-btn');
+
+      if (activeWhatIfMode === 'linked') {
+        const max = getMaxForAction();
+        if (action === 'buy') {
+          availableHint.innerText = `Available: ${fmtF(data.fiat)}`;
+          maxBtn.style.display = data.fiat > 0 ? 'block' : 'none';
+        } else if (action === 'sell') {
+          availableHint.innerText = `Available: ${fmtB(data.btc.liquid)}`;
+          maxBtn.style.display = data.btc.liquid > 0 ? 'block' : 'none';
+        } else {
+          availableHint.innerText = '';
+          maxBtn.style.display = 'none';
+        }
+      } else {
+        availableHint.innerText = 'Simulation mode – no limit';
+        maxBtn.style.display = 'none';
+      }
+
+      if (activeWhatIfMode === 'linked') {
+        if (action === 'hold') {
+          const totalBtc = data.btc.cold + data.btc.liquid + data.btc.mobile;
+          res.innerHTML = isPrivacy ? '****' : `At ${formatCurrency(price)}, your total BTC stack is worth <strong>${formatCurrency(totalBtc * price)}</strong>.`;
+          return;
+        }
+        if (amt <= 0 || price <= 0) {
+          const totalBtc = data.btc.cold + data.btc.liquid + data.btc.mobile;
+          res.innerHTML = isPrivacy ? '****' : `Enter an amount to simulate. Your total stack is <strong>${fmtB(totalBtc)}</strong> (≈ <strong>${fmtF(totalBtc * liveBtcPrice)}</strong>).`;
+          return;
+        }
+        const pos = calculatePosition();
+        const dailyShortfall = (!pos.hasSurplus && pos.runwayMonths) ? Math.abs(pos.net) / 30 : 0;
+
+        if (action === 'buy') {
+          if (amt > data.fiat) { res.innerText = '⚠️ Not enough fiat.'; return; }
+          const btcGained = amt / price;
+          if (dailyShortfall > 0) {
+            const deltaDays = -(amt / dailyShortfall);
+            res.innerHTML = `Spending <strong>${formatCurrency(amt)}</strong> adds <strong>${btcGained.toFixed(4)} BTC</strong>. Runway drops by <strong>${Math.abs(deltaDays).toFixed(1)} days</strong>.`;
+          } else {
+            res.innerHTML = `Spending <strong>${formatCurrency(amt)}</strong> adds <strong>${btcGained.toFixed(4)} BTC</strong>.`;
+          }
+        } else if (action === 'sell') {
+          if (amt > data.btc.liquid) { res.innerText = '⚠️ Not enough liquid BTC.'; return; }
+          const fiatGained = amt * price;
+          if (dailyShortfall > 0) {
+            const deltaDays = fiatGained / dailyShortfall;
+            res.innerHTML = `Selling <strong>${amt} BTC</strong> adds <strong>${formatCurrency(fiatGained)}</strong>. Runway extends by <strong>${deltaDays.toFixed(1)} days</strong>.`;
+          } else {
+            res.innerHTML = `Selling <strong>${amt} BTC</strong> adds <strong>${formatCurrency(fiatGained)}</strong> to your fiat.`;
+          }
+        }
+      } else {
+        if (amt <= 0 || price <= 0) { res.innerText = 'Enter an amount and price for a hypothetical scenario.'; return; }
+        if (action === 'buy') res.innerHTML = `Hypothetical: Spending ${formatCurrency(amt)} buys <strong>${(amt / price).toFixed(4)} BTC</strong> at ${formatCurrency(price)}.`;
+        else if (action === 'sell') res.innerHTML = `Hypothetical: Selling ${amt} BTC at ${formatCurrency(price)} gives <strong>${formatCurrency(amt * price)}</strong>.`;
+        else res.innerHTML = `If BTC reached ${formatCurrency(price)}, a stack of 1 BTC would be worth <strong>${formatCurrency(price)}</strong>.`;
+      }
+      if (isPrivacy) res.innerHTML = res.innerHTML.replace(/\$\d[\d,.]*/g, '****').replace(/\d+\.\d+ BTC/g, '****');
+    }
+
+    function togglePrivacy() {
+      isPrivacy = !isPrivacy;
+      document.getElementById('privacy-icon').setAttribute('d', isPrivacy ? 'M1 1l22 22 M17.94 17.94A10.07 10.07 0 0 1 12 21c-4.97 0-9-3.03-9-7 0-3.97 4.03-7 9-7a10.07 10.07 0 0 1 5.94 2.06' : 'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z');
+      renderAll();
+    }
+    function exportDataPrompt() {
+      const anon = confirm('Anonymize financial values before exporting?');
+      let exportObj = JSON.parse(JSON.stringify(data));
+      if (anon) {
+        exportObj.fiat = 0; exportObj.income = 0;
+        exportObj.btc = { cold: 0, liquid: 0, mobile: 0 };
+        exportObj.obligations = exportObj.obligations.map(o => ({ ...o, amount: 0 }));
+      }
+      exportObj.telemetry.exportCount++;
+      data.telemetry.exportCount++;
+      saveData();
+      const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = anon ? 'raft-telemetry-anon.json' : 'raft-backup.json'; a.click();
+    }
+    function importData(event) {
+      const file = event.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (typeof parsed.fiat === 'number') {
+            data = { ...data, ...parsed };
+            data.telemetry.importCount = (data.telemetry.importCount || 0) + 1;
+            saveData(); renderAll();
+            alert('Data imported.');
+          }
+        } catch (e) { alert('Invalid file.'); }
+      };
+      reader.readAsText(file);
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>

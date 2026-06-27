@@ -1,0 +1,25 @@
+<div class="border border-orange-200 bg-orange-50/30 rounded-xl p-6">
+  <h3 class="text-sm font-semibold text-orange-800 mb-2">Tax Awareness</h3>
+  <p class="text-xs text-orange-600/80 mb-4">
+    Selling or spending Bitcoin may create taxable events in your jurisdiction. 
+    This list includes any bills paid via BTC bridge.
+  </p>
+  
+  <div class="flex flex-col gap-2 max-h-32 overflow-y-auto">
+    @if (store.bridgeBills().length === 0) {
+      <p class="text-xs italic text-orange-600/60">
+        No bills paid with BTC yet. When you start, they'll appear here as potentially taxable events.
+      </p>
+    } @else {
+      @for (b of store.displayBridgeBills(); track b.id) {
+        <div class="flex justify-between items-center text-sm py-1 border-b border-orange-100 last:border-0 text-orange-900">
+          <span>{{ b.name }} (Day {{ b.day }})</span>
+          <span class="font-medium bg-orange-100/50 px-2 py-0.5 rounded">
+            @if (b.displayAmount === '****') { **** } @else { {{ b.amount | currency:store.currency().toUpperCase():'symbol':'1.0-0' }} } 
+            <span class="text-xs font-normal text-orange-700 ml-1">via BTC bridge</span>
+          </span>
+        </div>
+      }
+    }
+  </div>
+</div>

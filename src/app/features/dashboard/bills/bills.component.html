@@ -1,0 +1,43 @@
+<div class="border border-gray-200 bg-white rounded-xl p-6 flex flex-col gap-6 shadow-sm h-full">
+  <h3 class="text-sm font-semibold flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <svg class="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> 
+      Bills
+    </div>
+    <button (click)="manageBills.emit()" class="text-xs text-gray-500 hover:text-gray-900 border border-gray-200 px-2 py-1 rounded transition-colors">Manage</button>
+  </h3>
+  
+  <div class="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1">
+    @if (sortedBills().length === 0) {
+      <div class="text-sm text-gray-400 italic">No bills yet. <button (click)="manageBills.emit()" class="underline hover:text-gray-700">Add your first bill</button> to see your runway.</div>
+    } @else {
+      @for (b of store.displayObligations(); track b.id) {
+        <div class="flex justify-between items-center py-2 border-b border-gray-50 last:border-0 hover:bg-gray-50 rounded px-2 -mx-2 transition-colors">
+          <div class="flex items-center gap-3">
+            <span class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-bold text-gray-500">{{ b.day }}</span>
+            <span class="text-sm font-medium">{{ b.name }}</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-sm font-medium sensitive-data">
+              @if (b.displayAmount === '****') { **** } @else { {{ b.amount | currency:store.currency().toUpperCase():'symbol':'1.0-0' }} }
+            </span>
+            <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded border" [class.bg-orange-50]="b.method === 'bridge'" [class.text-orange-700]="b.method === 'bridge'" [class.border-orange-200]="b.method === 'bridge'" [class.bg-gray-100]="b.method !== 'bridge'" [class.text-gray-600]="b.method !== 'bridge'" [class.border-gray-200]="b.method !== 'bridge'">
+              {{ b.method === 'bridge' ? 'BTC' : 'Fiat' }}
+            </span>
+          </div>
+        </div>
+      }
+    }
+  </div>
+  
+  <div class="mt-auto pt-4 border-t border-gray-100 flex justify-between items-center">
+    <span class="text-xs text-gray-500 font-medium">{{ nextDueAlert() }}</span>
+    <span class="text-xs text-gray-400 font-medium">
+      Fiat Bills: 
+      <span class="sensitive-data text-gray-900">
+        @if (store.displayTotalFiatBills() === '****') { **** } @else { {{ store.totalFiatBills() | currency:store.currency().toUpperCase():'symbol':'1.0-0' }} }
+      </span>
+    </span>
+  </div>
+</div>
+

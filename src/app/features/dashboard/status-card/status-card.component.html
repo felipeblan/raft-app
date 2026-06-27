@@ -1,0 +1,245 @@
+<!-- Backup & Storage Awareness Banners -->
+@if (showFirstLaunchBanner()) {
+  <div class="mb-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 text-amber-800 dark:text-amber-300 rounded-xl p-4 flex justify-between items-start text-xs shadow-sm">
+    <div class="flex gap-2.5 items-start">
+      <svg class="w-5 h-5 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <div>
+        <span class="font-bold block mb-0.5">Raft keeps all your data in this browser</span>
+        If you clear your browser’s site data, your Raft info will be gone. Export a backup anytime to keep a copy safe.
+      </div>
+    </div>
+    <button (click)="dismissFirstLaunchBanner()" class="text-amber-600 hover:text-amber-800 transition-colors ml-4 shrink-0">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+}
+
+@if (showBackupNudge()) {
+  <div class="mb-4 bg-sky-50 dark:bg-sky-950/20 border border-sky-200 dark:border-sky-900/30 text-sky-800 dark:text-sky-300 rounded-xl p-4 flex justify-between items-center text-xs shadow-sm">
+    <div class="flex gap-2.5 items-center">
+      <svg class="w-5 h-5 text-sky-600 dark:text-sky-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <span>You haven’t exported a backup in a while. <strong>Want to save a copy now?</strong></span>
+    </div>
+    <div class="flex gap-3 items-center ml-4 shrink-0">
+      <button (click)="triggerBackup()" class="bg-sky-600 dark:bg-sky-700 text-white font-semibold text-[10px] rounded px-2.5 py-1.5 hover:bg-sky-700 transition-colors">Export Backup</button>
+      <button (click)="dismissBackupNudge()" class="text-sky-400 hover:text-sky-700 transition-colors">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+}
+
+<!-- Payday Pulse Summary Banner -->
+@if (showPaydayPulse()) {
+  <div class="bg-linear-to-r from-orange-500 to-amber-500 border border-orange-400 text-white rounded-xl p-5 flex justify-between items-start shadow-sm mb-4 relative overflow-hidden">
+    <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+    <div class="absolute -left-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+    
+    <div class="flex gap-3.5 items-start relative z-10">
+      <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white shrink-0 mt-0.5">
+        <svg class="w-5 h-5 animate-bounce" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+      </div>
+      <div>
+        <span class="font-bold text-base block mb-0.5 tracking-tight">Payday Pulse ⚡</span>
+        <p class="text-xs text-white/95 leading-relaxed font-medium">{{ paydayPulseMessage() }}</p>
+      </div>
+    </div>
+    <button (click)="dismissPaydayPulse()" class="text-white/70 hover:text-white transition-colors ml-4 relative z-10 shrink-0">
+      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+}
+
+<!-- Income Change Awareness Banner -->
+@if (store.incomeChangeBanner()) {
+  <div class="mb-4 rounded-xl p-4 flex justify-between items-start text-sm shadow-sm transition-colors border"
+       [class.bg-green-50]="store.incomeChangeBanner()?.isIncrease"
+       [class.dark:bg-green-950/20]="store.incomeChangeBanner()?.isIncrease"
+       [class.border-green-200]="store.incomeChangeBanner()?.isIncrease"
+       [class.dark:border-green-900/30]="store.incomeChangeBanner()?.isIncrease"
+       [class.text-green-800]="store.incomeChangeBanner()?.isIncrease"
+       [class.dark:text-green-300]="store.incomeChangeBanner()?.isIncrease"
+       [class.bg-blue-50]="!store.incomeChangeBanner()?.isIncrease"
+       [class.dark:bg-blue-950/20]="!store.incomeChangeBanner()?.isIncrease"
+       [class.border-blue-200]="!store.incomeChangeBanner()?.isIncrease"
+       [class.dark:border-blue-900/30]="!store.incomeChangeBanner()?.isIncrease"
+       [class.text-blue-800]="!store.incomeChangeBanner()?.isIncrease"
+       [class.dark:text-blue-300]="!store.incomeChangeBanner()?.isIncrease">
+    <div class="flex gap-2.5 items-start">
+      @if (store.incomeChangeBanner()?.isIncrease) {
+        <svg class="w-5 h-5 text-green-600 dark:text-green-500 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+      } @else {
+        <svg class="w-5 h-5 text-blue-600 dark:text-blue-500 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>
+      }
+      <div>
+        <span class="font-bold block mb-0.5">Position Updated</span>
+        {{ store.incomeChangeBanner()?.message }}
+      </div>
+    </div>
+    <button (click)="store.dismissIncomeChangeBanner()" class="hover:opacity-75 transition-opacity ml-4 shrink-0"
+            [class.text-green-600]="store.incomeChangeBanner()?.isIncrease"
+            [class.text-blue-600]="!store.incomeChangeBanner()?.isIncrease">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+}
+
+<section class="p-8 rounded-xl border flex flex-col gap-6 transition-colors duration-300 bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-800 shadow-sm">
+  <div class="flex items-center justify-between">
+    <h2 class="text-xs font-bold tracking-widest text-gray-500 dark:text-slate-400 uppercase">Your Position</h2>
+    <div class="flex items-center gap-2 font-medium text-sm px-3 py-1 rounded-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 text-gray-700 dark:text-slate-300">
+      @if (isLowRunway()) {
+        <svg class="w-4 h-4 text-orange-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>Low Runway</span>
+      } @else {
+        <svg class="w-4 h-4 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span>OK</span>
+      }
+    </div>
+  </div>
+  
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+    <div class="bg-gray-50 dark:bg-slate-800 rounded-xl p-5 border border-gray-100 dark:border-slate-700/60">
+      <div class="text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wider font-semibold mb-2">Fiat Runway</div>
+      <div class="text-4xl font-light tracking-tight text-gray-900 dark:text-white">
+        @if (store.displayNetCashflow() === '****') { **** } @else { {{ runwayMainText() }} }
+      </div>
+      <div class="text-sm text-gray-500 dark:text-slate-400 mt-1">{{ runwaySubText() }}</div>
+      
+      @if ((store.monthlySpending() || 0) > 0 && adjustedRunwayText()) {
+        <div class="text-[11px] text-gray-400 dark:text-slate-500 mt-1.5 italic font-medium">
+          With your estimated everyday spending, your runway is {{ adjustedRunwayText() }}.
+        </div>
+      }
+      
+      <div class="mt-3 bg-gray-200 dark:bg-slate-800 rounded-full h-2 w-full">
+        <div class="h-2 rounded-full bg-green-600" [style.width.%]="runwayPercentage()"></div>
+      </div>
+      <div class="text-xs text-gray-500 dark:text-slate-400 mt-1">{{ runwayBarLabel() }}</div>
+      <div class="text-xs text-gray-500 dark:text-slate-400 mt-2">Inflation Impact: -0.2% / mo (est)</div>
+    </div>
+    
+    <div class="bg-orange-50/50 dark:bg-orange-950/20 rounded-xl p-5 border border-orange-100 dark:border-orange-900/30 flex flex-col justify-between">
+      <div>
+        <div class="text-xs text-orange-600 dark:text-orange-400 uppercase tracking-wider font-semibold mb-2">Monthly BTC Capacity</div>
+        <div class="text-4xl font-light tracking-tight text-orange-700 dark:text-orange-350">
+          @if (store.displayBtcCapacity() === '****' && store.monthlyBtcCapacity() > 0) { **** } @else { {{ capacityMainText() }} }
+        </div>
+        <div class="text-sm text-orange-500 dark:text-orange-400 mt-1">
+          @if (store.displayBtcCapacity() === '****' && store.monthlyBtcCapacity() > 0) { /month } @else { {{ capacitySubText() }} }
+        </div>
+      </div>
+      
+      <!-- Reverse goal-setting -->
+      <div class="mt-4 pt-4 border-t border-orange-200 dark:border-orange-900/30">
+        <div class="flex items-center justify-between text-xs mb-2">
+          <span class="text-orange-600 dark:text-orange-400 uppercase tracking-wider font-semibold">Goal Tracker</span>
+          <button (click)="openGoalModal()" class="text-orange-700 dark:text-orange-400 hover:underline text-xs font-semibold">Set Goal</button>
+        </div>
+        <div class="flex items-center gap-3">
+          <svg class="goal-ring shrink-0" width="48" height="48" viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--border)" stroke-width="2"></circle>
+            <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--accent)" stroke-width="3" stroke-dasharray="100" [attr.stroke-dashoffset]="100 - goalProgressPercentage()" stroke-linecap="round"></circle>
+          </svg>
+          <div>
+            <div class="text-sm font-semibold text-gray-900 dark:text-white">
+              {{ goalDisplayLabel() }}
+            </div>
+            <div class="text-xs text-gray-500 dark:text-slate-400">
+              {{ goalTargetLabel() }} ({{ goalProgressPercentage() | number:'1.0-0' }}%)
+            </div>
+          </div>
+        </div>
+        
+        <!-- Target Date Projection -->
+        @if (goalProjectionMessage()) {
+          <div class="text-xs text-gray-500 dark:text-slate-400 mt-3 font-medium bg-white/40 dark:bg-slate-900/40 p-2 rounded border border-orange-100 dark:border-orange-900/20 w-full text-center">
+            {{ goalProjectionMessage() }}
+          </div>
+        }
+
+        <!-- Nudge to What-If Simulator -->
+        @if (store.goalType() === 'stacking' && store.goalSats() > 0 && store.monthlyBtcCapacity() > 0) {
+          <div class="mt-3 text-center">
+            <button (click)="simulateGoal()" class="text-xs text-orange-700 dark:text-orange-400 font-medium hover:underline">
+              See how this affects your runway
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+  
+  <div class="text-sm font-medium pt-2 border-t border-gray-100 dark:border-slate-800 text-gray-600 dark:text-slate-350">
+    {{ statusMessage() }}
+  </div>
+  
+  @if (store.history().length > 0) {
+    <div class="mt-4 pt-4 border-t border-gray-100 dark:border-slate-800">
+      <h4 class="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase mb-2">Runway History</h4>
+      <div class="flex items-end gap-1 h-12">
+        @for (item of store.history(); track item.date) {
+          <div class="bg-gray-300 dark:bg-slate-700 w-full rounded-t-sm" [style.height.%]="getHistoryBarHeight(item.runwayMonths)" [title]="item.date + ': ' + item.runwayMonths + ' months'"></div>
+        }
+      </div>
+      <div class="text-xs text-gray-450 dark:text-slate-500 mt-1">Past {{ store.history().length }} snapshots</div>
+    </div>
+  }
+</section>
+
+<!-- Goal Modal -->
+@if (isGoalModalOpen) {
+  <div class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm overflow-y-auto z-50">
+    <div class="min-h-screen flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-gray-200 dark:border-slate-800 p-6 w-full max-w-sm animate-fade-in my-8">
+        <h2 class="text-lg font-bold mb-4 text-gray-900 dark:text-white">Configure Your Goal</h2>
+        <div class="flex flex-col gap-4">
+          <div>
+            <label class="text-xs font-semibold block mb-1 text-gray-700 dark:text-slate-300">I want to track</label>
+            <select [(ngModel)]="tempGoalType" class="w-full border rounded-md p-2 bg-white dark:bg-slate-800 text-sm">
+              <option value="stacking">Stacking sats</option>
+              <option value="runway">Fiat runway</option>
+            </select>
+          </div>
+          
+          @if (tempGoalType === 'stacking') {
+            <div class="flex gap-2">
+              <div class="flex-1">
+                <label class="text-xs font-semibold block mb-1 text-gray-700 dark:text-slate-300">
+                  {{ tempGoalUnit === 'fiat' ? 'Amount per month' : 'Sats per month' }}
+                </label>
+                <div class="relative">
+                  @if (tempGoalUnit === 'fiat') {
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">{{ store.currencySymbol() }}</span>
+                  }
+                  <input type="number" [(ngModel)]="tempGoalSats" [placeholder]="tempGoalUnit === 'fiat' ? 'e.g. 50' : 'e.g. 2000000'" class="w-full border rounded-md p-2 text-sm" [class.pl-7]="tempGoalUnit === 'fiat'">
+                </div>
+              </div>
+              <div class="w-24">
+                <label class="text-xs font-semibold block mb-1 text-gray-700 dark:text-slate-300">Unit</label>
+                <select [(ngModel)]="tempGoalUnit" class="w-full border rounded-md p-2 bg-white dark:bg-slate-800 text-sm">
+                  <option value="fiat">Fiat</option>
+                  <option value="sats">Sats</option>
+                </select>
+              </div>
+            </div>
+          } @else {
+            <div>
+              <label class="text-xs font-semibold block mb-1 text-gray-700 dark:text-slate-300">Target runway (months)</label>
+              <input type="number" [(ngModel)]="tempGoalRunwayMonths" placeholder="e.g. 6" class="w-full border rounded-md p-2 text-sm">
+            </div>
+          }
+          
+          <p class="text-xs text-gray-500 dark:text-slate-400">This goal is for you only. Raft will show your progress, no judgment.</p>
+        </div>
+        <div class="flex justify-end gap-3 mt-6 border-t border-gray-100 dark:border-slate-800 pt-4">
+          <button (click)="closeGoalModal()" class="px-4 py-2 text-sm font-medium hover:text-gray-900 dark:hover:text-white transition-colors">Cancel</button>
+          <button (click)="saveGoal()" class="px-5 py-2 bg-gray-900 dark:bg-slate-800 text-white rounded-md text-sm font-semibold hover:bg-slate-800 transition-colors">Save Goal</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+

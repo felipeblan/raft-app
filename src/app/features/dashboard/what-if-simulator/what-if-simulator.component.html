@@ -1,0 +1,86 @@
+<div class="border border-gray-200 bg-white rounded-xl p-6 shadow-sm">
+  <h3 class="text-sm font-semibold flex items-center gap-2 mb-4">
+    <svg class="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    What-If Testing
+  </h3>
+  
+  <div class="flex gap-2 mb-4 border-b border-gray-100 pb-2">
+    <button (click)="mode.set('linked')" class="text-xs font-medium px-3 py-1.5 rounded-md transition-colors" [class.bg-gray-900]="mode() === 'linked'" [class.text-white]="mode() === 'linked'" [class.text-gray-500]="mode() !== 'linked'" [class.hover:text-gray-900]="mode() !== 'linked'">
+      Linked (My Stack)
+    </button>
+    <button (click)="mode.set('sim')" class="text-xs font-medium px-3 py-1.5 rounded-md transition-colors" [class.bg-gray-900]="mode() === 'sim'" [class.text-white]="mode() === 'sim'" [class.text-gray-500]="mode() !== 'sim'" [class.hover:text-gray-900]="mode() !== 'sim'">
+      Simulation (Scratchpad)
+    </button>
+  </div>
+  
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <label class="text-xs font-medium block mb-1">Action</label>
+      <select [(ngModel)]="action" class="w-full border rounded-md p-2 text-sm">
+        <option value="buy">Buy BTC (Spend Fiat)</option>
+        <option value="sell">Sell BTC (Receive Fiat)</option>
+        <option value="hold">Hold (Forecast Value)</option>
+      </select>
+    </div>
+    <div>
+      <label class="text-xs font-medium block mb-1">
+        Amount ({{ store.userDisplayMode() === 'fiat' || action() === 'buy' ? store.currencySymbol() : 'BTC' }})
+      </label>
+      <input type="number" [(ngModel)]="amount" placeholder="0" class="w-full border rounded-md p-2 text-sm">
+      @if (btcPreview()) {
+        <span class="text-[11px] text-gray-500 mt-1 block">{{ btcPreview() }}</span>
+      }
+    </div>
+    <div class="sm:col-span-2">
+      <label class="text-xs font-medium block mb-1">BTC Price ({{ store.currencySymbol() }})</label>
+      <input type="number" [(ngModel)]="price" class="w-full border rounded-md p-2 text-sm">
+    </div>
+    
+    <div class="sm:col-span-2 bg-gray-50 p-4 rounded-lg border border-gray-100 mt-2 text-sm text-gray-700">
+      @if (simResult(); as res) {
+        <div class="w-full">
+          @if (res.error) {
+            <span class="text-red-600 font-medium">⚠️ {{ res.error }}</span>
+          } @else {
+            <div class="flex flex-col gap-1">
+              @if (action() === 'hold') {
+                @if (mode() === 'linked') {
+                  <span>Your total stack would be worth <span class="font-bold">
+                    @if (store.isPrivacyMode()) { **** } @else { {{ res.totalWorth | currency:store.currency().toUpperCase():'symbol':'1.0-0' }} }
+                  </span>.</span>
+                } @else {
+                  <span><span class="font-bold">@if (store.userDisplayMode() === 'fiat') { {{ amount() | currency:store.currency().toUpperCase():'symbol':'1.0-0' }} } @else { {{ amount() }} BTC }</span> at this price would be worth <span class="font-bold">{{ res.totalWorth | currency:store.currency().toUpperCase():'symbol':'1.0-0' }}</span>.</span>
+                }
+              }
+
+              @if (action() === 'buy') {
+                <span>Spending <span class="font-bold">
+                  @if (store.isPrivacyMode()) { **** } @else { {{ amount() | currency:store.currency().toUpperCase():'symbol':'1.0-0' }} }
+                </span> would add <span class="font-bold text-orange-600">{{ res.btcGained | number:'1.4-4' }} BTC</span> to your stack.</span>
+                @if (res.newFiat !== undefined) {
+                  <span>New fiat balance: <span class="font-medium">
+                    @if (store.isPrivacyMode()) { **** } @else { {{ res.newFiat | currency:store.currency().toUpperCase():'symbol':'1.0-0' }} }
+                  </span>.</span>
+                }
+                @if (res.deltaDays !== undefined) {
+                  <span>Runway shift: <span class="font-bold text-orange-600">{{ res.deltaDays | number:'1.1-1' }} days</span>.</span>
+                }
+              }
+
+              @if (action() === 'sell') {
+                <span>Selling <span class="font-bold text-orange-600">@if (store.userDisplayMode() === 'fiat') { {{ amount() | currency:store.currency().toUpperCase():'symbol':'1.0-0' }} } @else { {{ amount() }} BTC }</span> would add <span class="font-bold">
+                  @if (store.isPrivacyMode()) { **** } @else { {{ res.fiatGained | currency:store.currency().toUpperCase():'symbol':'1.0-0' }} }
+                </span> to your fiat.</span>
+                @if (res.deltaDays !== undefined) {
+                  <span>Runway shift: <span class="font-bold text-green-600">+{{ res.deltaDays | number:'1.1-1' }} days</span>.</span>
+                }
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <span class="italic text-gray-400">Enter amount and price to see impact.</span>
+      }
+    </div>
+  </div>
+</div>

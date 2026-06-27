@@ -1,0 +1,186 @@
+<div class="border border-gray-200 bg-white rounded-xl p-6 flex flex-col gap-6 shadow-sm">
+  <div class="flex items-center justify-between">
+    <h3 class="text-sm font-semibold flex items-center gap-2">
+      <svg class="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Liquidity & Cashflow
+    </h3>
+    <button (click)="openPositionModal()" class="text-gray-400 hover:text-gray-900 transition-colors" title="Update position">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
+  <div class="flex flex-col gap-4">
+    <div class="flex justify-between items-end border-b border-gray-100 pb-3">
+      <span class="text-sm text-gray-500">Current Fiat</span>
+      <span class="text-xl font-medium sensitive-data">
+        @if (store.displayFiat() === '****') { **** } @else { {{ store.fiat() | currency:store.currency().toUpperCase():'symbol':'1.0-0' }} }
+      </span>
+    </div>
+    <div class="flex justify-between items-end border-b border-gray-100 pb-3">
+      <span class="text-sm text-gray-500">Expected Income</span>
+      <span class="text-lg font-medium text-green-600 sensitive-data">
+        @if (store.displayIncome() === '****') { **** } @else { +{{ store.income() | currency:store.currency().toUpperCase():'symbol':'1.0-0' }} }
+      </span>
+    </div>
+    <div class="flex justify-between items-end pb-1 border-b border-gray-100">
+      <span class="text-sm font-medium">Monthly Net</span>
+      <span class="text-xl font-bold sensitive-data">
+        @if (store.displayNetCashflow() === '****') { **** } @else {
+          @if (store.netCashflow() > 0) {
+            <span class="text-green-600">+{{ store.netCashflow() | currency:store.currency().toUpperCase():'symbol':'1.0-0' }}</span><span class="text-xs text-gray-400 font-normal ml-1">/mo</span>
+          } @else if (store.netCashflow() < 0) {
+            <span class="text-red-600">−{{ (store.netCashflow() * -1) | currency:store.currency().toUpperCase():'symbol':'1.0-0' }}</span><span class="text-xs text-gray-400 font-normal ml-1">/mo</span>
+          } @else {
+            <span>{{ 0 | currency:store.currency().toUpperCase():'symbol':'1.0-0' }}</span><span class="text-xs text-gray-400 font-normal ml-1">/mo</span>
+          }
+        }
+      </span>
+    </div>
+    @if (store.btcBridgeSpend() > 0) {
+      <div class="flex justify-between items-end pt-1">
+        <span class="text-sm font-medium text-orange-600 flex items-center gap-1.5">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg> 
+          BTC spent on bills
+        </span>
+        <span class="text-lg font-bold text-orange-600 sensitive-data">
+          @if (store.displayBtcBridgeSpend() === '****') { **** } @else { {{ store.btcBridgeSpend() | number:'1.4-4' }} BTC/mo }
+        </span>
+      </div>
+    }
+    <div class="flex justify-between items-end pt-2 border-t border-gray-100">
+      <span class="text-sm font-medium">Total BTC</span>
+      <span class="text-lg font-bold sensitive-data">
+        {{ store.displayTotalBtc() }}
+      </span>
+    </div>
+    
+    <div class="pt-2 border-t border-gray-100">
+      <label class="text-xs text-gray-500 cursor-pointer hover:text-gray-700">
+        <input type="file" accept=".csv" (change)="importCSV($event)" class="hidden">
+        Import bank CSV to auto-add bills
+      </label>
+    </div>
+  </div>
+</div>
+
+<!-- Position Modal -->
+@if (isModalOpen) {
+  <div class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm overflow-y-auto z-50">
+    <div class="min-h-screen flex items-center justify-center p-4">
+      <div class="bg-white rounded-xl shadow-2xl border border-gray-200 p-6 w-full max-w-md animate-fade-in my-8">
+        <h2 class="text-lg font-semibold mb-4">Update Position</h2>
+        <div class="flex flex-col gap-4">
+          <div>
+            <label class="text-xs font-medium block mb-1">Current Fiat ({{ store.currencySymbol() }})</label>
+            <input type="number" [(ngModel)]="updFiat" class="w-full border rounded-md p-2">
+          </div>
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label class="text-xs font-medium">Income Sources</label>
+              @if (!showIncomeForm) {
+                <button (click)="openIncomeForm()" class="text-xs text-blue-600 hover:text-blue-800 font-medium">Add</button>
+              }
+            </div>
+            
+            @if (showIncomeForm) {
+              <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-2 animate-fade-in">
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                  <div>
+                    <label class="text-[10px] uppercase font-bold tracking-wider text-gray-500 block mb-1">Name</label>
+                    <input type="text" [(ngModel)]="formIncomeName" placeholder="e.g. Day Job" class="w-full border rounded-md p-1.5 text-sm">
+                  </div>
+                  <div>
+                    <label class="text-[10px] uppercase font-bold tracking-wider text-gray-500 block mb-1">Amount ({{ store.currencySymbol() }})</label>
+                    <input type="number" [(ngModel)]="formIncomeAmount" class="w-full border rounded-md p-1.5 text-sm">
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2 mb-3">
+                  <div>
+                    <label class="text-[10px] uppercase font-bold tracking-wider text-gray-500 block mb-1">Frequency</label>
+                    <select [(ngModel)]="formIncomeFreq" class="w-full border rounded-md p-1.5 text-sm">
+                      <option value="monthly">Monthly</option>
+                      <option value="biweekly">Bi-weekly (1st & 15th)</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="custom">Custom day</option>
+                      <option value="irregular">Irregular</option>
+                    </select>
+                  </div>
+                  @if (formIncomeFreq === 'custom') {
+                    <div>
+                      <label class="text-[10px] uppercase font-bold tracking-wider text-gray-500 block mb-1">Days (comma separated)</label>
+                      <input type="text" [(ngModel)]="formIncomeCustomDays" placeholder="e.g. 5, 20" class="w-full border rounded-md p-1.5 text-sm">
+                    </div>
+                  }
+                </div>
+                <div class="flex justify-end gap-2">
+                  <button (click)="cancelIncomeForm()" class="text-xs font-medium text-gray-500 hover:text-gray-700 px-2 py-1">Cancel</button>
+                  <button (click)="saveIncomeSource()" class="text-xs font-medium bg-gray-900 text-white px-3 py-1 rounded hover:bg-gray-800">Save</button>
+                </div>
+              </div>
+            }
+            
+            <div class="flex flex-col gap-1 max-h-32 overflow-y-auto">
+              @if (store.incomeSources().length === 0 && !showIncomeForm) {
+                <div class="text-xs text-gray-400 italic py-1">No income sources.</div>
+              }
+              @for (source of store.incomeSources(); track source.id) {
+                <div class="flex justify-between items-center bg-gray-50 border border-gray-100 rounded p-2 group">
+                  <div>
+                    <div class="text-sm font-medium">{{ source.name }}</div>
+                    <div class="text-xs text-gray-500">{{ source.amount | currency:store.currency().toUpperCase():'symbol':'1.0-0' }} · <span class="capitalize">{{ source.frequency }}</span></div>
+                  </div>
+                  <div class="flex items-center gap-1 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button (click)="openIncomeForm(source)" class="text-gray-400 hover:text-blue-600 p-1"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
+                    <button (click)="deleteIncomeSource(source.id)" class="text-gray-400 hover:text-red-600 p-1"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
+                  </div>
+                </div>
+              }
+            </div>
+            <div class="text-xs text-gray-500 mt-2 text-right">
+              Total monthly: <strong>{{ store.income() | currency:store.currency().toUpperCase():'symbol':'1.0-0' }}</strong>
+            </div>
+          </div>
+
+          <div class="relative">
+            <label class="text-xs font-medium block mb-1 text-gray-700">Average monthly spending ({{ store.currencySymbol() }})</label>
+            <input type="number" 
+                   [(ngModel)]="updMonthlySpending" 
+                   (focus)="onMonthlySpendingFocus()" 
+                   (blur)="onMonthlySpendingInteraction()"
+                   (input)="onMonthlySpendingInteraction()"
+                   placeholder="Optional"
+                   class="w-full border rounded-md p-2 text-sm">
+            @if (showSpendingTooltip) {
+              <div class="absolute z-10 w-64 p-3 mt-1.5 text-[11px] leading-relaxed text-white bg-slate-800 rounded-md shadow-lg left-0 animate-fade-in pointer-events-none">
+                This is your best estimate of what you spend each month on food, transport, shopping, and other everyday needs that aren't fixed bills.
+                <div class="absolute w-2 h-2 bg-slate-800 transform rotate-45 -top-1 left-6"></div>
+              </div>
+            }
+          </div>
+
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="text-xs font-medium block mb-1">Cold ({{ store.currencySymbol() }})</label>
+              <input type="number" [(ngModel)]="updFiatCold" class="w-full border rounded-md p-2 text-sm">
+              <div class="text-[10px] text-gray-500 mt-1">{{ getBtcPreview(updFiatCold) }}</div>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-orange-700 block mb-1">Liquid ({{ store.currencySymbol() }})</label>
+              <input type="number" [(ngModel)]="updFiatLiquid" class="w-full border border-orange-200 rounded-md p-2 bg-orange-50 text-sm">
+              <div class="text-[10px] text-orange-600/70 mt-1">{{ getBtcPreview(updFiatLiquid) }}</div>
+            </div>
+            <div>
+              <label class="text-xs font-medium block mb-1">Mobile ({{ store.currencySymbol() }})</label>
+              <input type="number" [(ngModel)]="updFiatMobile" class="w-full border rounded-md p-2 text-sm">
+              <div class="text-[10px] text-gray-500 mt-1">{{ getBtcPreview(updFiatMobile) }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="flex justify-end gap-3 mt-6 border-t border-gray-100 pt-4">
+          <button (click)="closePositionModal()" class="px-4 py-2 text-sm font-medium hover:text-gray-900">Cancel</button>
+          <button (click)="savePosition()" class="px-5 py-2 bg-gray-900 text-white rounded-md text-sm font-medium hover:bg-gray-800">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+

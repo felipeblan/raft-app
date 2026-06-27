@@ -1,0 +1,51 @@
+@reference "tailwindcss";
+
+@reference "tailwindcss";
+
+.app-container {
+  @apply min-h-screen bg-[#FDFDFD] text-gray-900;
+
+  &.privacy-blur {
+    @apply blur-sm pointer-events-none select-none;
+  }
+}
+
+.main-nav {
+  @apply border-b border-gray-200 bg-white sticky top-0 z-40;
+
+  .nav-content {
+    @apply max-w-4xl mx-auto px-6;
+  }
+
+  .nav-wrapper {
+    @apply py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4;
+  }
+
+  .logo-area {
+    @apply font-semibold tracking-tight text-lg flex items-center gap-2;
+    
+    .version-tag {
+      @apply text-gray-400 font-normal text-sm ml-1 border-l pl-2;
+    }
+  }
+
+  .actions-area {
+    @apply flex items-center gap-4;
+  }
+
+  .btc-price-tag {
+    @apply text-xs font-mono text-gray-500 bg-gray-50 px-2 py-1 rounded border border-gray-100 hidden sm:flex items-center gap-1;
+  }
+
+  .divider {
+    @apply h-4 w-px bg-gray-200 hidden sm:block;
+  }
+
+  .nav-btn {
+    @apply text-gray-400 hover:text-gray-900 transition-colors flex items-center gap-1 text-sm font-medium;
+    
+    &.btn-danger {
+      @apply text-red-400 hover:text-red-600;
+    }
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "projects": {
+    "default": "raft-btc-app"
+  }
+}
