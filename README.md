@@ -43,7 +43,7 @@ You can also install Raft to your phone's home screen for a fullâ€‘screen, appâ€
 If you want to run Raft on your own machine:
 
 1. Clone the repository: `git clone [repo URL]`
-2. Install dependencies: `npm install`
+2. Install dependencies: `npm install --legacy-peer-deps`
 3. Start the development server: `ng serve`
 4. Open your browser to `http://localhost:4200`
 
