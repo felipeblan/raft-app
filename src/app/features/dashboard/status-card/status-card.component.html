@@ -103,8 +103,13 @@
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
     <div class="bg-gray-50 dark:bg-slate-800 rounded-xl p-5 border border-gray-100 dark:border-slate-700/60">
       <div class="text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wider font-semibold mb-2">Fiat Runway</div>
-      <div class="text-4xl font-light tracking-tight text-gray-900 dark:text-white">
-        @if (store.displayNetCashflow() === '****') { **** } @else { {{ runwayMainText() }} }
+      <div class="text-4xl font-light tracking-tight text-gray-900 dark:text-white flex items-baseline gap-2">
+        @if (store.displayNetCashflow() === '****') { **** } @else { 
+          {{ runwayMainText() }}
+          @if (annualRunwayText()) {
+            <span class="text-lg text-gray-400 font-medium">{{ annualRunwayText() }}</span>
+          }
+        }
       </div>
       <div class="text-sm text-gray-500 dark:text-slate-400 mt-1">{{ runwaySubText() }}</div>
       

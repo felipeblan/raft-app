@@ -58,6 +58,14 @@ export class StatusCardComponent implements OnInit {
     }
   }
 
+  annualRunwayText() {
+    const months = this.store.fiatRunwayMonths();
+    if (months === null || months === 999) return null;
+    const years = months / 12;
+    if (years < 1) return null;
+    return `(~${years.toFixed(1)} years)`;
+  }
+
   runwaySubText() {
     const rm = this.store.fiatRunwayMonths();
     if (this.store.hasSurplus()) {
